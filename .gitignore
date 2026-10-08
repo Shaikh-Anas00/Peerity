@@ -1,0 +1,81 @@
+# ==========================================
+# Peerity - Comprehensive .gitignore
+# ==========================================
+
+# ── Dependencies ──────────────────────────
+node_modules/
+**/node_modules/
+vendor/
+
+# ── Build Outputs & Binaries ──────────────
+dist/
+**/dist/
+build/
+**/build/
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+backend/.mvn/apache-maven-*/
+
+# ── Runtime Storage & Uploaded Artifacts ──
+# Strictly prevents student submission binaries and encrypted artifacts from being tracked
+php-service/storage/encrypted/*.enc
+*.enc
+uploads/
+**/uploads/
+
+# ── Environment Secrets & Credentials ─────
+.env
+.env.*
+.env.example
+*.private
+*.key
+*.pem
+*.pfx
+*.p12
+*.cer
+*.crt
+
+# ── Local Database Dumps & Temp Files ─────
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.dmp
+*.bak
+
+# ── Logs & Diagnostic Dumps ───────────────
+logs/
+**/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── IDEs, Editors & OS Files ──────────────
+.idea/
+.vscode/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ── Scratch & Tool Metadata ───────────────
+scratch/
+.system_generated/
