@@ -86,7 +86,7 @@ export const AnalyticsPage: React.FC = () => {
           <button
             onClick={loadData}
             disabled={loading}
-            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition border border-slate-200 bg-white shadow-xs"
+            className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs"
             title="Refresh analytics"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -98,75 +98,75 @@ export const AnalyticsPage: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(n => (
-              <div key={n} className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 animate-pulse">
-                <div className="h-3 bg-slate-200 rounded w-1/2" />
-                <div className="h-8 bg-slate-200 rounded w-1/3" />
-                <div className="h-2 bg-slate-100 rounded w-full" />
+              <div key={n} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-3 animate-pulse">
+                <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/2" />
+                <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-1/3" />
+                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded w-full" />
               </div>
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-6 h-80 animate-pulse" />
-            <div className="bg-white rounded-xl border border-slate-200 p-6 h-80 animate-pulse" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 h-80 animate-pulse" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 h-80 animate-pulse" />
           </div>
         </div>
       ) : !data ? (
-        <div className="text-center py-20 text-slate-400 bg-white rounded-xl border border-slate-200">
+        <div className="text-center py-20 text-slate-400 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
           <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-400" />
-          <p className="font-semibold text-slate-700 font-display">Failed to load analytics data</p>
+          <p className="font-semibold text-slate-700 dark:text-slate-200 font-display">Failed to load analytics data</p>
           <p className="text-xs text-slate-400 mt-1 font-body">Please refresh the page or check back later.</p>
         </div>
       ) : (
         <>
           {/* Top KPI Cards: Review Completion */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-display">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
                   Total Reviews Assigned
                 </span>
-                <Clock className="w-4 h-4 text-blue-500" />
+                <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" />
               </div>
-              <p className="text-3xl font-bold text-slate-900 font-display">{data.reviewCompletion.totalAssigned}</p>
-              <p className="text-xs text-slate-400 font-body">Across active course submissions</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 font-display">{data.reviewCompletion.totalAssigned}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-body">Across active course submissions</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-display">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
                   Reviews Completed
                 </span>
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               </div>
-              <p className="text-3xl font-bold text-emerald-600 font-display">{data.reviewCompletion.completed}</p>
-              <p className="text-xs text-slate-400 font-body">Rubric scores and feedback submitted</p>
+              <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 font-display">{data.reviewCompletion.completed}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-body">Rubric scores and feedback submitted</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-display">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
                   Completion Rate
                 </span>
-                <TrendingUp className="w-4 h-4 text-peerity-800" />
+                <TrendingUp className="w-4 h-4 text-peerity-800 dark:text-teal-400" />
               </div>
-              <p className="text-3xl font-bold text-peerity-800 font-display">{data.reviewCompletion.completionRate}%</p>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <p className="text-3xl font-bold text-peerity-800 dark:text-teal-400 font-display">{data.reviewCompletion.completionRate}%</p>
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-peerity-800 rounded-full transition-all duration-500"
+                  className="h-full bg-peerity-800 dark:bg-teal-500 rounded-full transition-all duration-500"
                   style={{ width: `${Math.min(data.reviewCompletion.completionRate, 100)}%` }}
                 />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider font-display">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
                   Total Disputes Filed
                 </span>
-                <Scale className="w-4 h-4 text-amber-500" />
+                <Scale className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               </div>
-              <p className="text-3xl font-bold text-amber-600 font-display">{data.disputeMetrics.totalDisputes}</p>
-              <p className="text-xs text-slate-400 font-body">
+              <p className="text-3xl font-bold text-amber-600 dark:text-amber-400 font-display">{data.disputeMetrics.totalDisputes}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-body">
                 Resolved Upheld: {data.disputeMetrics.byStatus?.RESOLVED_UPHELD || 0} &bull; Dismissed:{" "}
                 {data.disputeMetrics.byStatus?.RESOLVED_DISMISSED || 0}
               </p>
@@ -176,21 +176,21 @@ export const AnalyticsPage: React.FC = () => {
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Score Distribution Histogram */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-peerity-800" />
-                  <h3 className="text-base font-bold text-slate-900 font-display">Score Distribution Histogram</h3>
+                  <BarChart3 className="w-5 h-5 text-peerity-800 dark:text-teal-400" />
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Score Distribution Histogram</h3>
                 </div>
-                <span className="text-xs text-slate-500 font-body">Bins (0-100 scale)</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-body">Bins (0-100 scale)</span>
               </div>
-              <p className="text-xs text-slate-500 font-body">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-body">
                 Aggregated distribution of all rubric criterion scores given by peer reviewers.
               </p>
               <div className="h-64 w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.scoreDistributions}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.2)" />
                     <XAxis dataKey="range" tick={{ fontSize: 12, fill: "#64748b" }} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#64748b" }} />
                     <Tooltip
@@ -209,15 +209,15 @@ export const AnalyticsPage: React.FC = () => {
             </div>
 
             {/* Dispute Reasons Breakdown Donut */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <PieIcon className="w-5 h-5 text-amber-600" />
-                  <h3 className="text-base font-bold text-slate-900 font-display">Dispute Reasons Breakdown</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Dispute Reasons Breakdown</h3>
                 </div>
-                <span className="text-xs text-slate-500 font-body">{data.disputeMetrics.totalDisputes} Filed</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-body">{data.disputeMetrics.totalDisputes} Filed</span>
               </div>
-              <p className="text-xs text-slate-500 font-body">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-body">
                 Grounds for appeal categorized by policy engine severity tier.
               </p>
 
@@ -263,12 +263,12 @@ export const AnalyticsPage: React.FC = () => {
           </div>
 
           {/* Progressive Disclosure Tier Metrics */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <h3 className="text-base font-bold text-slate-900 font-display">Progressive Disclosure Tier Governance</h3>
+              <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Progressive Disclosure Tier Governance</h3>
             </div>
-            <p className="text-xs text-slate-500 font-body">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-body">
               Distribution of reviewer privacy disclosure states currently authorized across the platform.
             </p>
 
@@ -279,18 +279,18 @@ export const AnalyticsPage: React.FC = () => {
                 return (
                   <div
                     key={tier}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between"
+                    className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex flex-col justify-between shadow-xs transition hover:border-slate-300 dark:hover:border-slate-700"
                   >
                     <div>
                       <div className="flex items-center gap-1.5 mb-1">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider font-display">
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
                           {tier.split("_").slice(0, 2).join(" ")}
                         </span>
                       </div>
-                      <p className="text-xs font-semibold text-slate-800 line-clamp-1 font-body">{tierName}</p>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 line-clamp-1 font-body">{tierName}</p>
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 mt-3 font-display">{count}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3 font-display">{count}</p>
                   </div>
                 );
               })}
@@ -299,54 +299,54 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* B4 fix: Reviewer Quality & Calibration card — was missing from JSX */}
           {data.reviewerQuality && (
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
               <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-purple-600" />
-                <h3 className="text-base font-bold text-slate-900 font-display">Reviewer Quality &amp; Calibration</h3>
+                <Award className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Reviewer Quality &amp; Calibration</h3>
               </div>
-              <p className="text-xs text-slate-500 font-body">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-body">
                 Aggregate calibration accuracy and peer feedback helpfulness across all reviewers in scope.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-                <div className="p-4 rounded-xl border border-purple-100 bg-purple-50/40 space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider font-display">Avg Calibration Accuracy</p>
-                  <p className="text-2xl font-bold text-purple-700 font-display">
+                <div className="p-4 rounded-xl border border-purple-200/60 dark:border-purple-900/50 bg-purple-50/50 dark:bg-purple-950/30 space-y-1">
+                  <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider font-display">Avg Calibration Accuracy</p>
+                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300 font-display">
                     {data.reviewerQuality.averageCalibrationScore !== null
                       ? `${Math.round(data.reviewerQuality.averageCalibrationScore)}%`
                       : "—"}
                   </p>
-                  <p className="text-xs text-slate-400 font-body">Mean accuracy vs expert benchmark scores</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-body">Mean accuracy vs expert benchmark scores</p>
                 </div>
 
-                <div className="p-4 rounded-xl border border-peerity-200 bg-peerity-100/50 space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider font-display">Calibration Completion</p>
-                  <p className="text-2xl font-bold text-peerity-900 font-display">
+                <div className="p-4 rounded-xl border border-peerity-200/80 dark:border-teal-900/50 bg-peerity-100/50 dark:bg-teal-950/30 space-y-1">
+                  <p className="text-xs font-bold text-peerity-700 dark:text-teal-400 uppercase tracking-wider font-display">Calibration Completion</p>
+                  <p className="text-2xl font-bold text-peerity-900 dark:text-teal-200 font-display">
                     {Math.round(data.reviewerQuality.calibrationCompletionRate)}%
                   </p>
-                  <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mt-1">
+                  <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mt-1">
                     <div
-                      className="h-full bg-peerity-600 rounded-full"
+                      className="h-full bg-peerity-600 dark:bg-teal-400 rounded-full"
                       style={{ width: `${Math.min(data.reviewerQuality.calibrationCompletionRate, 100)}%` }}
                     />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/40 space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Avg Feedback Rating</p>
-                  <p className="text-2xl font-bold text-amber-700">
+                <div className="p-4 rounded-xl border border-amber-200/60 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/30 space-y-1">
+                  <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider font-display">Avg Feedback Rating</p>
+                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300 font-display">
                     {data.reviewerQuality.averageFeedbackRating > 0
                       ? `${data.reviewerQuality.averageFeedbackRating.toFixed(1)} / 5`
                       : "—"}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-body">
                     Helpfulness rate: {Math.round(data.reviewerQuality.helpfulnessRate)}% &bull; {data.reviewerQuality.totalRatingsCount} ratings
                   </p>
                 </div>
               </div>
 
               {data.reviewerQuality.totalRatingsCount === 0 && (
-                <p className="text-xs text-slate-400 text-center pt-2 italic">
+                <p className="text-xs text-slate-400 text-center pt-2 italic font-body">
                   No review ratings submitted yet. Data will appear once students rate received feedback.
                 </p>
               )}

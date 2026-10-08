@@ -103,22 +103,42 @@ html.dark .landing-page .text-peerity-700 {
   color: #2B7A78 !important;
 }
 
-html.dark .bg-slate-50 {
-  background-color: #0b0f19 !important;
+html.dark .bg-slate-50:not(.landing-page *),
+html.dark .bg-slate-50\/20:not(.landing-page *),
+html.dark .bg-slate-50\/30:not(.landing-page *),
+html.dark .bg-slate-50\/40:not(.landing-page *),
+html.dark .bg-slate-50\/50:not(.landing-page *),
+html.dark .bg-slate-50\/60:not(.landing-page *),
+html.dark .bg-slate-50\/70:not(.landing-page *),
+html.dark .bg-slate-50\/80:not(.landing-page *),
+html.dark .bg-slate-50\/90:not(.landing-page *),
+html.dark [class*=" bg-slate-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-slate-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]) {
+  background-color: #162035 !important;
 }
 
-html.dark .bg-slate-100 {
+html.dark .bg-slate-100:not(.landing-page *),
+html.dark .bg-slate-100\/40:not(.landing-page *),
+html.dark .bg-slate-100\/50:not(.landing-page *),
+html.dark .bg-slate-100\/60:not(.landing-page *),
+html.dark .bg-slate-100\/70:not(.landing-page *),
+html.dark .bg-slate-100\/80:not(.landing-page *),
+html.dark .bg-slate-100\/90:not(.landing-page *),
+html.dark [class*=" bg-slate-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-slate-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]) {
   background-color: #182238 !important;
 }
 
-html.dark .bg-slate-200,
-html.dark .bg-slate-200\/90 {
+html.dark .bg-slate-200:not(.landing-page *),
+html.dark .bg-slate-200\/40:not(.landing-page *),
+html.dark .bg-slate-200\/50:not(.landing-page *),
+html.dark .bg-slate-200\/60:not(.landing-page *),
+html.dark .bg-slate-200\/70:not(.landing-page *),
+html.dark .bg-slate-200\/80:not(.landing-page *),
+html.dark .bg-slate-200\/90:not(.landing-page *),
+html.dark [class*=" bg-slate-200"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-slate-200"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]) {
   background-color: #222f49 !important;
-}
-
-html.dark .bg-slate-50\/70,
-html.dark .bg-slate-50\/60 {
-  background-color: #162035 !important;
 }
 
 html.dark .text-slate-900,
@@ -140,7 +160,9 @@ html.dark .border-slate-100,
 html.dark .border-slate-200,
 html.dark .border-slate-300,
 html.dark .border-slate-200\/90,
-html.dark .border-slate-200\/80 {
+html.dark .border-slate-200\/80,
+html.dark [class*=" border-slate-"]:not(.landing-page *):not([class*="dark:border-"]),
+html.dark [class^="border-slate-"]:not(.landing-page *):not([class*="dark:border-"]) {
   border-color: #222f49 !important;
 }
 
@@ -164,58 +186,188 @@ html.dark .text-peerity-900 {
   color: #2dd4bf !important;
 }
 
-html.dark [class*="bg-peerity-50"] {
+html.dark [class*="bg-peerity-50"]:not(.landing-page *) {
   background-color: #162035 !important;
   border-color: #222f49 !important;
   color: #cbd5e1 !important;
 }
 
-html.dark .bg-peerity-100,
-html.dark [class*="bg-peerity-100"] {
+html.dark .bg-peerity-100:not(.landing-page *),
+html.dark [class*="bg-peerity-100"]:not(.landing-page *) {
   background-color: #162035 !important;
   color: #2dd4bf !important;
 }
 
-html.dark .border-peerity-200,
-html.dark [class*="border-peerity-200"] {
+html.dark .border-peerity-200:not(.landing-page *),
+html.dark [class*="border-peerity-200"]:not(.landing-page *) {
   border-color: #222f49 !important;
 }
 
-/* Rose / Danger tokens */
-html.dark [class*="bg-rose-50"] {
+/* Purple tokens (Reviewer Quality, Calibration, Quorum Tiers) */
+html.dark .bg-purple-50:not(.landing-page *),
+html.dark .bg-purple-50\/30:not(.landing-page *),
+html.dark .bg-purple-50\/40:not(.landing-page *),
+html.dark .bg-purple-50\/50:not(.landing-page *),
+html.dark .bg-purple-50\/60:not(.landing-page *),
+html.dark .bg-purple-50\/70:not(.landing-page *),
+html.dark .bg-purple-50\/80:not(.landing-page *),
+html.dark .bg-purple-100:not(.landing-page *),
+html.dark [class*=" bg-purple-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-purple-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class*=" bg-purple-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-purple-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]) {
+  background-color: rgba(88, 28, 135, 0.25) !important;
+  border-color: rgba(147, 51, 234, 0.35) !important;
+  color: #d8b4fe !important;
+}
+html.dark .border-purple-100:not(.landing-page *),
+html.dark .border-purple-200:not(.landing-page *),
+html.dark .border-purple-300:not(.landing-page *),
+html.dark [class*=" border-purple-"]:not(.landing-page *):not([class*="dark:border-"]),
+html.dark [class^="border-purple-"]:not(.landing-page *):not([class*="dark:border-"]) {
+  border-color: rgba(147, 51, 234, 0.35) !important;
+}
+html.dark .text-purple-600:not(.landing-page *),
+html.dark .text-purple-700:not(.landing-page *),
+html.dark .text-purple-800:not(.landing-page *),
+html.dark .text-purple-900:not(.landing-page *),
+html.dark [class*=" text-purple-"]:not(.landing-page *):not([class*="dark:text-"]),
+html.dark [class^="text-purple-"]:not(.landing-page *):not([class*="dark:text-"]) {
+  color: #c084fc !important;
+}
+
+/* Blue tokens */
+html.dark .bg-blue-50:not(.landing-page *),
+html.dark .bg-blue-50\/30:not(.landing-page *),
+html.dark .bg-blue-50\/40:not(.landing-page *),
+html.dark .bg-blue-50\/50:not(.landing-page *),
+html.dark .bg-blue-50\/60:not(.landing-page *),
+html.dark .bg-blue-50\/70:not(.landing-page *),
+html.dark .bg-blue-50\/80:not(.landing-page *),
+html.dark .bg-blue-100:not(.landing-page *),
+html.dark [class*=" bg-blue-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-blue-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class*=" bg-blue-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-blue-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]) {
+  background-color: rgba(30, 58, 138, 0.28) !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+  color: #93c5fd !important;
+}
+html.dark .border-blue-100:not(.landing-page *),
+html.dark .border-blue-200:not(.landing-page *),
+html.dark .border-blue-300:not(.landing-page *),
+html.dark [class*=" border-blue-"]:not(.landing-page *):not([class*="dark:border-"]),
+html.dark [class^="border-blue-"]:not(.landing-page *):not([class*="dark:border-"]) {
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+html.dark .text-blue-600:not(.landing-page *),
+html.dark .text-blue-700:not(.landing-page *),
+html.dark .text-blue-800:not(.landing-page *),
+html.dark .text-blue-900:not(.landing-page *),
+html.dark [class*=" text-blue-"]:not(.landing-page *):not([class*="dark:text-"]),
+html.dark [class^="text-blue-"]:not(.landing-page *):not([class*="dark:text-"]) {
+  color: #60a5fa !important;
+}
+
+/* Indigo tokens */
+html.dark .bg-indigo-50:not(.landing-page *),
+html.dark .bg-indigo-50\/30:not(.landing-page *),
+html.dark .bg-indigo-50\/40:not(.landing-page *),
+html.dark .bg-indigo-50\/50:not(.landing-page *),
+html.dark .bg-indigo-50\/60:not(.landing-page *),
+html.dark .bg-indigo-50\/70:not(.landing-page *),
+html.dark .bg-indigo-50\/80:not(.landing-page *),
+html.dark .bg-indigo-100:not(.landing-page *),
+html.dark [class*=" bg-indigo-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-indigo-50"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class*=" bg-indigo-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]),
+html.dark [class^="bg-indigo-100"]:not([class*="hover:"]):not(.landing-page *):not([class*="dark:bg-"]) {
+  background-color: rgba(49, 46, 129, 0.28) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  color: #a5b4fc !important;
+}
+html.dark .border-indigo-100:not(.landing-page *),
+html.dark .border-indigo-200:not(.landing-page *),
+html.dark .border-indigo-300:not(.landing-page *),
+html.dark [class*=" border-indigo-"]:not(.landing-page *):not([class*="dark:border-"]),
+html.dark [class^="border-indigo-"]:not(.landing-page *):not([class*="dark:border-"]) {
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+html.dark .text-indigo-600:not(.landing-page *),
+html.dark .text-indigo-700:not(.landing-page *),
+html.dark .text-indigo-800:not(.landing-page *),
+html.dark .text-indigo-900:not(.landing-page *),
+html.dark [class*=" text-indigo-"]:not(.landing-page *):not([class*="dark:text-"]),
+html.dark [class^="text-indigo-"]:not(.landing-page *):not([class*="dark:text-"]) {
+  color: #818cf8 !important;
+}
+
+/* Rose & Red / Danger tokens */
+html.dark [class*="bg-rose-50"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-rose-100"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-red-50"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-red-100"]:not([class*="hover:"]):not(.landing-page *) {
   background-color: rgba(69, 10, 10, 0.35) !important;
   border-color: rgba(159, 18, 57, 0.45) !important;
   color: #fda4af !important;
 }
-html.dark [class*="hover:bg-rose-50"]:hover {
+html.dark [class*="hover:bg-rose-50"]:hover,
+html.dark [class*="hover:bg-red-50"]:hover {
   background-color: rgba(69, 10, 10, 0.55) !important;
 }
-html.dark [class*="text-rose-700"],
-html.dark [class*="text-rose-600"],
-html.dark [class*="text-rose-900"] {
+html.dark [class*="border-rose-"]:not(.landing-page *),
+html.dark [class*="border-red-"]:not(.landing-page *) {
+  border-color: rgba(159, 18, 57, 0.45) !important;
+}
+html.dark [class*="text-rose-700"]:not(.landing-page *),
+html.dark [class*="text-rose-600"]:not(.landing-page *),
+html.dark [class*="text-rose-900"]:not(.landing-page *),
+html.dark [class*="text-red-600"]:not(.landing-page *),
+html.dark [class*="text-red-700"]:not(.landing-page *),
+html.dark [class*="text-red-800"]:not(.landing-page *),
+html.dark [class*="text-red-900"]:not(.landing-page *) {
   color: #fda4af !important;
 }
 
 /* Amber / Warning tokens */
-html.dark [class*="bg-amber-50"] {
+html.dark [class*="bg-amber-50"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-amber-100"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-yellow-50"]:not([class*="hover:"]):not(.landing-page *) {
   background-color: rgba(69, 26, 3, 0.35) !important;
   border-color: rgba(180, 83, 9, 0.45) !important;
   color: #fcd34d !important;
 }
-html.dark [class*="text-amber-700"],
-html.dark [class*="text-amber-800"],
-html.dark [class*="text-amber-900"] {
+html.dark [class*="hover:bg-amber-50"]:hover,
+html.dark [class*="hover:bg-amber-100"]:hover {
+  background-color: rgba(69, 26, 3, 0.55) !important;
+}
+html.dark [class*="border-amber-"]:not(.landing-page *) {
+  border-color: rgba(180, 83, 9, 0.45) !important;
+}
+html.dark [class*="text-amber-700"]:not(.landing-page *),
+html.dark [class*="text-amber-800"]:not(.landing-page *),
+html.dark [class*="text-amber-900"]:not(.landing-page *) {
   color: #fcd34d !important;
 }
 
 /* Emerald / Success tokens */
-html.dark [class*="bg-emerald-50"] {
+html.dark [class*="bg-emerald-50"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-emerald-100"]:not([class*="hover:"]):not(.landing-page *),
+html.dark [class*="bg-green-50"]:not([class*="hover:"]):not(.landing-page *) {
   background-color: rgba(6, 78, 59, 0.35) !important;
   border-color: rgba(4, 120, 87, 0.45) !important;
   color: #6ee7b7 !important;
 }
-html.dark [class*="text-emerald-700"],
-html.dark [class*="text-emerald-800"] {
+html.dark [class*="hover:bg-emerald-50"]:hover,
+html.dark [class*="hover:bg-emerald-100"]:hover {
+  background-color: rgba(6, 78, 59, 0.55) !important;
+}
+html.dark [class*="border-emerald-"]:not(.landing-page *) {
+  border-color: rgba(4, 120, 87, 0.45) !important;
+}
+html.dark [class*="text-emerald-700"]:not(.landing-page *),
+html.dark [class*="text-emerald-800"]:not(.landing-page *),
+html.dark [class*="text-emerald-900"]:not(.landing-page *) {
   color: #6ee7b7 !important;
 }
 
@@ -227,7 +379,10 @@ html.dark input[type="checkbox"] {
 }
 
 html.dark .hover\:bg-slate-50:hover,
-html.dark .hover\:bg-slate-100:hover {
+html.dark .hover\:bg-slate-100:hover,
+html.dark [class*="hover:bg-slate-50"]:hover,
+html.dark [class*="hover:bg-slate-100"]:hover,
+html.dark [class*="hover:bg-slate-200"]:hover {
   background-color: #1c273e !important;
 }
 
