@@ -45,10 +45,62 @@ html.dark body {
 }
 
 html.dark aside,
-html.dark header,
-html.dark .bg-white {
+html.dark header:not(.landing-header),
+html.dark .bg-white:not(.landing-page *) {
   background-color: #131b2e !important;
   color: #f8fafc !important;
+}
+
+/* ── Landing Page Light Theme Preservation ────────────────────────────────── */
+.landing-header,
+html.dark .landing-header {
+  background-color: rgba(254, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #DEF2F1 !important;
+  color: #1d5553 !important;
+}
+
+.landing-page,
+html.dark .landing-page {
+  background-color: #FEFFFF !important;
+  color: #374151 !important;
+}
+
+html.dark .landing-page .bg-white {
+  background-color: #ffffff !important;
+  color: inherit !important;
+}
+
+html.dark .landing-page .bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+html.dark .landing-page .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
+html.dark .landing-page .text-slate-900,
+html.dark .landing-page .text-slate-800,
+html.dark .landing-page .text-slate-700 {
+  color: #1e293b !important;
+}
+
+html.dark .landing-page .text-slate-600,
+html.dark .landing-page .text-slate-500 {
+  color: #64748b !important;
+}
+
+html.dark .landing-page .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .landing-page .border-slate-100,
+html.dark .landing-page .border-slate-200 {
+  border-color: #e2e8f0 !important;
+}
+
+html.dark .landing-page .text-peerity-800,
+html.dark .landing-page .text-peerity-700 {
+  color: #2B7A78 !important;
 }
 
 html.dark .bg-slate-50 {

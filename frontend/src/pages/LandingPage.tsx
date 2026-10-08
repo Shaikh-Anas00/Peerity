@@ -60,7 +60,7 @@ const LandingNav: React.FC = () => {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 border-b"
+      className="landing-header fixed top-0 left-0 right-0 z-50 border-b"
       style={{
         borderColor: C.lightTint,
         backdropFilter: "blur(12px)",
@@ -938,7 +938,7 @@ const LandingFooter: React.FC = () => (
 /* ─────────────────────────────────────────────────────────────────────────── */
 const LandingPage: React.FC = () => {
   return (
-    <div style={{ backgroundColor: C.nearWhite, scrollBehavior: "smooth" }}>
+    <div className="landing-page min-h-screen" style={{ backgroundColor: C.nearWhite, scrollBehavior: "smooth" }}>
       <LandingNav />
       <HeroSection />
       <FeaturesSection />
