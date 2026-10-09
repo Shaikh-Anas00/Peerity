@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Lock, Mail, User as UserIcon, Building, BookOpen, AlertCircle, Info } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, User as UserIcon, Building, BookOpen, AlertCircle, Info, Eye, EyeOff } from 'lucide-react';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -36,6 +36,7 @@ export const Register: React.FC = () => {
 
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -121,7 +122,25 @@ export const Register: React.FC = () => {
               </label>
               <div className="relative">
                 <Lock className={iconCls} />
-                <input {...register('password')} type="password" placeholder="Min 8 chars, 1 uppercase, 1 number" className={inputCls} />
+                <input
+                  {...register('password')}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Min 8 chars, 1 uppercase, 1 number"
+                  className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-peerity-600 focus:bg-white transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1 rounded-md transition"
+                  title={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
               {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password.message}</p>}
             </div>
