@@ -135,6 +135,31 @@ public class GroupController {
     }
 
     /**
+     * DELETE /api/groups/{groupId} — INSTRUCTOR or ADMIN deletes or archives a group.
+     * Guarded delete:
+     * - If 0 evaluations exist: permanently deletes memberships and group.
+     * - If evaluations exist and force=false: returns 409 Conflict with guidance to archive/close.
+     * - If evaluations exist and force=true: sets status = CLOSED to preserve academic integrity.
+     */
+    @DeleteMapping("/{groupId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<ApiResponse> deleteGroup(@PathVariable String groupId,
+                                                   @RequestParam(value = "force", defaultValue = "false") boolean force,
+                                                   Authentication auth,
+                                                   HttpServletRequest req) {
+        User actor = resolveUser(auth);
+        String ip = clientIpResolver.resolveClientIp(req);
+        try {
+            String resultMessage = groupService.deleteGroup(groupId, force, actor, ip);
+            return ResponseEntity.ok(new ApiResponse(true, resultMessage));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
+        }
+    }
+
+    /**
      * POST /api/groups/{groupId}/evaluations — STUDENT submits a peer evaluation.
      * The evaluator identity is stored server-side but NEVER returned to the evaluated student.
      */

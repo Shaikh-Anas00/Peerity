@@ -185,6 +185,47 @@ public class GroupService {
                 actor.getEmail() + " removed user " + userId + " from group " + groupId, clientIp);
     }
 
+    /**
+     * Guarded delete of a group by INSTRUCTOR or ADMIN:
+     * - If no member evaluations exist: permanently deletes memberships and group entity.
+     * - If evaluations exist and force is false: throws IllegalStateException requiring archival.
+     * - If evaluations exist and force is true: safely archives/closes group without losing academic data.
+     */
+    @Transactional
+    public String deleteGroup(String groupId, boolean force, User actor, String clientIp) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found with id: " + groupId));
+
+        List<GroupMemberEvaluation> evaluations = evaluationRepository.findByGroupId(groupId);
+
+        if (!evaluations.isEmpty()) {
+            if (!force) {
+                throw new IllegalStateException(
+                        "Cannot permanently delete group '" + group.getName() + "' because "
+                        + evaluations.size() + " member evaluation(s) are recorded. "
+                        + "Please archive/close the group to preserve academic records."
+                );
+            }
+            // Guarded soft-close/archive to protect academic grading records
+            group.setStatus(GroupStatus.CLOSED);
+            groupRepository.save(group);
+            auditLedgerService.logEvent(
+                    "GROUP_ARCHIVED", actor.getEmail(), "Group", groupId,
+                    actor.getEmail() + " archived and closed group '" + group.getName() + "' with " + evaluations.size() + " evaluations", clientIp);
+            return "Group '" + group.getName() + "' has been archived and marked CLOSED to preserve academic records.";
+        }
+
+        // Clean permanent deletion since no evaluations exist
+        List<GroupMembership> memberships = membershipRepository.findByGroupId(groupId);
+        membershipRepository.deleteAll(memberships);
+        groupRepository.delete(group);
+
+        auditLedgerService.logEvent(
+                "GROUP_DELETED", actor.getEmail(), "Group", groupId,
+                actor.getEmail() + " permanently deleted group '" + group.getName() + "' and " + memberships.size() + " memberships", clientIp);
+        return "Group '" + group.getName() + "' has been permanently deleted.";
+    }
+
     // ── Evaluation — STUDENT view (aggregate, anonymised) ───────────────────
 
     /**
