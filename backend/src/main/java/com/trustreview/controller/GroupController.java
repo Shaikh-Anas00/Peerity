@@ -2,14 +2,15 @@ package com.trustreview.controller;
 
 import com.trustreview.dto.*;
 import com.trustreview.model.User;
-import com.trustreview.repository.UserRepository;
+import com.trustreview.security.PeerityUserDetails;
 import com.trustreview.service.GroupService;
 import com.trustreview.util.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,45 +30,40 @@ import java.util.List;
 public class GroupController {
 
     private final GroupService groupService;
-    private final UserRepository userRepository;
     private final ClientIpResolver clientIpResolver;
 
     public GroupController(GroupService groupService,
-                           UserRepository userRepository,
                            ClientIpResolver clientIpResolver) {
         this.groupService = groupService;
-        this.userRepository = userRepository;
         this.clientIpResolver = clientIpResolver;
-    }
-
-    private User resolveUser(Authentication auth) {
-        return userRepository.findByEmail(auth.getName())
-            .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
     }
 
     /** POST /api/groups — INSTRUCTOR or ADMIN creates a group */
     @PostMapping
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<GroupDto> createGroup(@RequestBody CreateGroupRequest request,
-                                                Authentication auth,
+                                                @AuthenticationPrincipal PeerityUserDetails principal,
                                                 HttpServletRequest req) {
-        User user = resolveUser(auth);
+        User user = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(groupService.createGroup(request, user, ip));
     }
 
-    /** GET /api/groups — INSTRUCTOR or ADMIN lists all groups */
+    /** GET /api/groups — INSTRUCTOR or ADMIN lists all groups (paginated) */
     @GetMapping
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
-    public ResponseEntity<List<GroupDto>> getAllGroups(@RequestParam(required = false) String assignmentId) {
-        return ResponseEntity.ok(groupService.getAllGroups(assignmentId));
+    public ResponseEntity<Page<GroupDto>> getAllGroups(
+            @RequestParam(required = false) String assignmentId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(groupService.getAllGroups(assignmentId, page, size));
     }
 
     /** GET /api/groups/my — any authenticated user sees their own groups */
     @GetMapping("/my")
-    public ResponseEntity<List<GroupDto>> getMyGroups(Authentication auth) {
-        User user = resolveUser(auth);
+    public ResponseEntity<List<GroupDto>> getMyGroups(@AuthenticationPrincipal PeerityUserDetails principal) {
+        User user = principal.getUser();
         return ResponseEntity.ok(groupService.getMyGroups(user.getId()));
     }
 
@@ -75,19 +71,12 @@ public class GroupController {
     @PostMapping("/{groupId}/join")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse> joinGroup(@PathVariable String groupId,
-                                                 Authentication auth,
+                                                 @AuthenticationPrincipal PeerityUserDetails principal,
                                                  HttpServletRequest req) {
-        User user = resolveUser(auth);
+        User user = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
-        try {
-            groupService.joinGroup(groupId, user, ip);
-            return ResponseEntity.ok(new ApiResponse(true, "Join request submitted."));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse(false, e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-        }
+        groupService.joinGroup(groupId, user, ip);
+        return ResponseEntity.ok(new ApiResponse(true, "Join request submitted."));
     }
 
     /** GET /api/groups/{groupId}/members — authenticated users see members of a group */
@@ -105,16 +94,12 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<ApiResponse> approveMember(@PathVariable String groupId,
                                                      @PathVariable String userId,
-                                                     Authentication auth,
+                                                     @AuthenticationPrincipal PeerityUserDetails principal,
                                                      HttpServletRequest req) {
-        User actor = resolveUser(auth);
+        User actor = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
-        try {
-            groupService.approveMember(groupId, userId, actor, ip);
-            return ResponseEntity.ok(new ApiResponse(true, "Member approved."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-        }
+        groupService.approveMember(groupId, userId, actor, ip);
+        return ResponseEntity.ok(new ApiResponse(true, "Member approved."));
     }
 
     /** DELETE /api/groups/{groupId}/members/{userId} — INSTRUCTOR or ADMIN removes a member */
@@ -122,16 +107,12 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<ApiResponse> removeMember(@PathVariable String groupId,
                                                     @PathVariable String userId,
-                                                    Authentication auth,
+                                                    @AuthenticationPrincipal PeerityUserDetails principal,
                                                     HttpServletRequest req) {
-        User actor = resolveUser(auth);
+        User actor = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
-        try {
-            groupService.removeMember(groupId, userId, actor, ip);
-            return ResponseEntity.ok(new ApiResponse(true, "Member removed."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-        }
+        groupService.removeMember(groupId, userId, actor, ip);
+        return ResponseEntity.ok(new ApiResponse(true, "Member removed."));
     }
 
     /**
@@ -142,20 +123,13 @@ public class GroupController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse> submitEvaluation(@PathVariable String groupId,
                                                         @RequestBody SubmitGroupEvaluationRequest request,
-                                                        Authentication auth,
+                                                        @AuthenticationPrincipal PeerityUserDetails principal,
                                                         HttpServletRequest req) {
         request.setGroupId(groupId);
-        User evaluator = resolveUser(auth);
+        User evaluator = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
-        try {
-            groupService.submitEvaluation(request, evaluator, ip);
-            return ResponseEntity.ok(new ApiResponse(true, "Evaluation submitted."));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse(false, e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-        }
+        groupService.submitEvaluation(request, evaluator, ip);
+        return ResponseEntity.ok(new ApiResponse(true, "Evaluation submitted."));
     }
 
     /**
@@ -167,8 +141,8 @@ public class GroupController {
     @GetMapping("/{groupId}/evaluations/my-aggregate")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<GroupMemberEvaluationDto> getMyAggregateEvaluation(
-            @PathVariable String groupId, Authentication auth) {
-        User user = resolveUser(auth);
+            @PathVariable String groupId, @AuthenticationPrincipal PeerityUserDetails principal) {
+        User user = principal.getUser();
         try {
             return ResponseEntity.ok(groupService.getMyAggregateEvaluation(groupId, user.getId()));
         } catch (IllegalArgumentException e) {
@@ -188,9 +162,9 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<List<GroupMemberEvaluationAdminDto>> getAllEvaluations(
             @PathVariable String groupId,
-            Authentication auth,
+            @AuthenticationPrincipal PeerityUserDetails principal,
             HttpServletRequest req) {
-        User actor = resolveUser(auth);
+        User actor = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
         try {
             return ResponseEntity.ok(groupService.getAllEvaluations(groupId, actor, ip));

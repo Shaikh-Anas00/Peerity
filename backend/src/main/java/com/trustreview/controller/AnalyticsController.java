@@ -2,11 +2,11 @@ package com.trustreview.controller;
 
 import com.trustreview.dto.AnalyticsDashboardDto;
 import com.trustreview.model.User;
-import com.trustreview.repository.UserRepository;
+import com.trustreview.security.PeerityUserDetails;
 import com.trustreview.service.AnalyticsService;
-import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
-    private final UserRepository userRepository;
 
-    public AnalyticsController(AnalyticsService analyticsService, UserRepository userRepository) {
+    public AnalyticsController(AnalyticsService analyticsService) {
         this.analyticsService = analyticsService;
-        this.userRepository = userRepository;
     }
 
     /**
@@ -30,11 +28,8 @@ public class AnalyticsController {
      */
     @GetMapping("/dashboard")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
-    public ResponseEntity<AnalyticsDashboardDto> getDashboardMetrics(Authentication auth) {
-        User user = null;
-        if (auth != null && auth.isAuthenticated()) {
-            user = userRepository.findByEmail(auth.getName()).orElse(null);
-        }
+    public ResponseEntity<AnalyticsDashboardDto> getDashboardMetrics(@AuthenticationPrincipal PeerityUserDetails principal) {
+        User user = principal != null ? principal.getUser() : null;
         return ResponseEntity.ok(analyticsService.getDashboardMetrics(user));
     }
 }

@@ -7,11 +7,14 @@ import com.trustreview.repository.AuditLogRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -23,6 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Phase 6: Tamper-Evident HMAC-SHA-256 Hash-Chained Audit Ledger Service.
@@ -43,20 +47,73 @@ public class AuditLedgerService {
     @Value("${audit.ledger.hmac-secret:TrustReview-Audit-Ledger-HMAC-Secret-Key-Phase6-Production-Grade}")
     private String hmacSecret;
 
-    private final AuditLogRepository auditLogRepository;
+    /** Appending a block can race with concurrent writers; retry a bounded number of times. */
+    private static final int MAX_APPEND_ATTEMPTS = 25;
 
-    public AuditLedgerService(AuditLogRepository auditLogRepository) {
+    private final AuditLogRepository auditLogRepository;
+    private final TransactionTemplate newTransactionTemplate;
+
+    public AuditLedgerService(AuditLogRepository auditLogRepository,
+                              PlatformTransactionManager transactionManager) {
         this.auditLogRepository = auditLogRepository;
+        this.newTransactionTemplate = new TransactionTemplate(transactionManager);
+        this.newTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /**
-     * Synchronized and transactional method to append a new cryptographically chained audit block.
+     * Appends a new cryptographically chained audit block.
+     *
+     * No longer {@code synchronized}: that serialized every mutating action in the entire
+     * application through a single JVM-wide lock, and provided zero correctness guarantee the
+     * moment more than one instance is running. Correctness instead comes from the DB-level
+     * unique constraint on {@code sequence_number} (see {@code AuditLog}): if two writers race
+     * for the same sequence number, one of them gets a {@link DataIntegrityViolationException}
+     * on flush, and this method simply re-reads the (now updated) tip and retries in a fresh
+     * transaction. Each attempt runs in its own {@code REQUIRES_NEW} transaction via
+     * {@link TransactionTemplate} rather than a self-invoked {@code @Transactional} method,
+     * because a failed flush leaves the current persistence context unusable — the retry needs
+     * a genuinely new transaction/session, not just a new call stack frame.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public synchronized AuditLog logEvent(String action, String actorEmail,
-                                          String targetEntity, String targetId,
-                                          String details, String ipAddress) {
+    public AuditLog logEvent(String action, String actorEmail,
+                             String targetEntity, String targetId,
+                             String details, String ipAddress) {
+        DataIntegrityViolationException lastFailure = null;
+        for (int attempt = 1; attempt <= MAX_APPEND_ATTEMPTS; attempt++) {
+            try {
+                return newTransactionTemplate.execute(status ->
+                        appendEntry(action, actorEmail, targetEntity, targetId, details, ipAddress));
+            } catch (DataIntegrityViolationException ex) {
+                lastFailure = ex;
+                log.warn("Audit ledger append collided on attempt {}/{} (concurrent writer claimed this "
+                        + "sequence number); retrying: {}", attempt, MAX_APPEND_ATTEMPTS, ex.getMessage());
+                // Jittered backoff: under heavy contention, every losing thread re-reads the same
+                // tip and retries at the same instant, so without jitter they keep colliding in
+                // lockstep. The random spread (growing with attempt count) de-synchronizes them.
+                if (attempt < MAX_APPEND_ATTEMPTS) {
+                    sleepWithJitter(attempt);
+                }
+            }
+        }
+        throw new IllegalStateException(
+                "Failed to append audit ledger entry after " + MAX_APPEND_ATTEMPTS
+                        + " attempts due to concurrent writers.", lastFailure);
+    }
 
+    private static void sleepWithJitter(int attempt) {
+        long maxMillis = Math.min(100L, attempt * 5L);
+        long delay = ThreadLocalRandom.current().nextLong(maxMillis + 1);
+        try {
+            if (delay > 0) {
+                Thread.sleep(delay);
+            }
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private AuditLog appendEntry(String action, String actorEmail,
+                                 String targetEntity, String targetId,
+                                 String details, String ipAddress) {
         Optional<AuditLog> latestOpt = auditLogRepository.findTopByOrderBySequenceNumberDesc();
 
         long sequenceNumber;
@@ -99,7 +156,6 @@ public class AuditLedgerService {
     /**
      * Convenience overload without IP address.
      */
-    @Transactional
     public AuditLog logEvent(String action, String actorEmail, String targetEntity, String targetId, String details) {
         return logEvent(action, actorEmail, targetEntity, targetId, details, "N/A");
     }
@@ -107,7 +163,6 @@ public class AuditLedgerService {
     /**
      * Convenience overload with basic parameters.
      */
-    @Transactional
     public AuditLog logEvent(String action, String actorEmail, String targetEntity, String targetId) {
         return logEvent(action, actorEmail, targetEntity, targetId, null, "N/A");
     }

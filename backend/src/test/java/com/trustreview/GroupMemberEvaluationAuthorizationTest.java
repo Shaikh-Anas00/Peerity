@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -77,7 +79,7 @@ class GroupMemberEvaluationAuthorizationTest {
     }
 
     @Test
-    @WithMockUser(roles = "INSTRUCTOR")
+    @WithUserDetails(value = "instructor1@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("INSTRUCTOR → GET /evaluations/all → 200 (full attribution for accountability)")
     void attributedEvaluations_instructor_200() throws Exception {
         // Will return 200 (empty list) since group doesn't exist but auth passes
@@ -92,7 +94,7 @@ class GroupMemberEvaluationAuthorizationTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithUserDetails(value = "admin@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("ADMIN → GET /evaluations/all → not 403 (full attribution access)")
     void attributedEvaluations_admin_notForbidden() throws Exception {
         mockMvc.perform(get("/api/groups/" + FAKE_GROUP_ID + "/evaluations/all"))
@@ -113,7 +115,7 @@ class GroupMemberEvaluationAuthorizationTest {
     // ── /api/groups/{id}/evaluations/my-aggregate — STUDENT only ─────────────
 
     @Test
-    @WithMockUser(roles = "STUDENT")
+    @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT → GET /evaluations/my-aggregate → not 403 (aggregate view allowed)")
     void aggregateEvaluation_student_notForbidden() throws Exception {
         mockMvc.perform(get("/api/groups/" + FAKE_GROUP_ID + "/evaluations/my-aggregate"))
@@ -227,7 +229,7 @@ class GroupMemberEvaluationAuthorizationTest {
     // ── GET /api/groups/my — all authenticated ────────────────────────────────
 
     @Test
-    @WithMockUser(roles = "STUDENT")
+    @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT → GET /api/groups/my → 200")
     void getMyGroups_student_200() throws Exception {
         mockMvc.perform(get("/api/groups/my"))
@@ -235,7 +237,7 @@ class GroupMemberEvaluationAuthorizationTest {
     }
 
     @Test
-    @WithMockUser(roles = "INSTRUCTOR")
+    @WithUserDetails(value = "instructor1@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("INSTRUCTOR → GET /api/groups/my → 200")
     void getMyGroups_instructor_200() throws Exception {
         mockMvc.perform(get("/api/groups/my"))

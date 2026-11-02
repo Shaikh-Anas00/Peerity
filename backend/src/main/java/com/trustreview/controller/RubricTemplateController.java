@@ -3,14 +3,13 @@ package com.trustreview.controller;
 import com.trustreview.dto.ApiResponse;
 import com.trustreview.dto.RubricTemplateDto;
 import com.trustreview.repository.RubricTemplateRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /** Read-only access to starter rubric templates, for staff who author assignments. */
 @RestController
@@ -23,14 +22,15 @@ public class RubricTemplateController {
         this.templateRepository = templateRepository;
     }
 
-    /** GET /api/rubric-templates - INSTRUCTOR or ADMIN. */
+    /** GET /api/rubric-templates - INSTRUCTOR or ADMIN (paginated). */
     @GetMapping
     @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
     @Transactional(readOnly = true)
-    public ResponseEntity<List<RubricTemplateDto>> list() {
-        return ResponseEntity.ok(templateRepository.findAllByOrderByNameAsc().stream()
-                .map(RubricTemplateDto::from)
-                .collect(Collectors.toList()));
+    public ResponseEntity<Page<RubricTemplateDto>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(templateRepository.findAllByOrderByNameAsc(PageRequest.of(page, size))
+                .map(RubricTemplateDto::from));
     }
 
     /** GET /api/rubric-templates/{id} - INSTRUCTOR or ADMIN. */

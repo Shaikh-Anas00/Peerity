@@ -6,7 +6,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -90,7 +91,7 @@ class AnonymityLeakTest {
     // ── Author view: GET /api/reviews/my-feedback ────────────────────────────
 
     @Test
-    @WithMockUser(username = AUTHOR_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = AUTHOR_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Author view: reviewerName must be null/absent (identity masked)")
     void authorView_reviewerName_isNull() throws Exception {
         mockMvc.perform(get("/api/reviews/my-feedback"))
@@ -104,7 +105,7 @@ class AnonymityLeakTest {
     }
 
     @Test
-    @WithMockUser(username = AUTHOR_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = AUTHOR_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Author view: reviewerEmail must be null/absent (identity masked)")
     void authorView_reviewerEmail_isNull() throws Exception {
         mockMvc.perform(get("/api/reviews/my-feedback"))
@@ -117,7 +118,7 @@ class AnonymityLeakTest {
     }
 
     @Test
-    @WithMockUser(username = AUTHOR_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = AUTHOR_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Author view: reviewerId must be null/absent (identity masked)")
     void authorView_reviewerId_isNull() throws Exception {
         mockMvc.perform(get("/api/reviews/my-feedback"))
@@ -130,7 +131,7 @@ class AnonymityLeakTest {
     }
 
     @Test
-    @WithMockUser(username = AUTHOR_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = AUTHOR_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Author view: reviewerPseudonym must be present and non-null")
     void authorView_pseudonym_isPresent() throws Exception {
         mockMvc.perform(get("/api/reviews/my-feedback"))
@@ -139,7 +140,7 @@ class AnonymityLeakTest {
     }
 
     @Test
-    @WithMockUser(username = AUTHOR_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = AUTHOR_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Author view: real reviewer name must NOT appear anywhere in response body")
     void authorView_realReviewerName_notInBody() throws Exception {
         mockMvc.perform(get("/api/reviews/my-feedback"))
@@ -156,7 +157,7 @@ class AnonymityLeakTest {
     // ── Reviewer view: GET /api/reviews/assigned-to-me ───────────────────────
 
     @Test
-    @WithMockUser(username = REVIEWER_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = REVIEWER_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Reviewer view: submission filename must be masked (not original)")
     void reviewerView_filename_isMasked() throws Exception {
         mockMvc.perform(get("/api/reviews/assigned-to-me"))
@@ -173,7 +174,7 @@ class AnonymityLeakTest {
     }
 
     @Test
-    @WithMockUser(username = REVIEWER_EMAIL, roles = "STUDENT")
+    @WithUserDetails(value = REVIEWER_EMAIL, setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Reviewer view: author real name must NOT appear in response")
     void reviewerView_authorName_notInBody() throws Exception {
         mockMvc.perform(get("/api/reviews/assigned-to-me"))

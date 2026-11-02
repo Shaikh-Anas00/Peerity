@@ -115,7 +115,10 @@ public class PolicyEngineService {
 
         // Level 3: Academic Standing & Review History
         if (rank >= 3 && reviewer != null) {
-            dto.setAcademicStanding("Year 3 Undergraduate");
+            dto.setAcademicStanding(
+                    reviewer.getAcademicStanding() != null && !reviewer.getAcademicStanding().isBlank()
+                            ? reviewer.getAcademicStanding()
+                            : "Not specified");
             dto.setReviewsCompleted(reviewsCompleted);
         }
 

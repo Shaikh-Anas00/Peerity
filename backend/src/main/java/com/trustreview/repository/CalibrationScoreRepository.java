@@ -4,6 +4,7 @@ import com.trustreview.model.CalibrationSample;
 import com.trustreview.model.CalibrationScore;
 import com.trustreview.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +16,12 @@ public interface CalibrationScoreRepository extends JpaRepository<CalibrationSco
     Optional<CalibrationScore> findBySampleAndStudent(CalibrationSample sample, User student);
     boolean existsBySampleAndStudent(CalibrationSample sample, User student);
     long countByStudent(User student);
+
+    // ── Analytics (see AnalyticsService) ──────────────────────────────────────
+
+    @Query("SELECT AVG(cs.accuracyPercentage) FROM CalibrationScore cs")
+    Double findAverageAccuracyPercentage();
+
+    @Query("SELECT COUNT(DISTINCT cs.student.id) FROM CalibrationScore cs")
+    long countDistinctStudents();
 }

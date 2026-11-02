@@ -1,6 +1,5 @@
 package com.trustreview.controller;
 
-import com.trustreview.dto.ApiResponse;
 import com.trustreview.dto.CreateUserRequest;
 import com.trustreview.dto.UserDto;
 import com.trustreview.service.UserService;
@@ -39,13 +38,9 @@ public class AdminUserController {
             @Valid @RequestBody CreateUserRequest request,
             Authentication auth,
             HttpServletRequest httpRequest) {
-        try {
-            String clientIp = getClientIp(httpRequest);
-            UserDto createdUser = userService.createPrivilegedUser(request, auth.getName(), clientIp);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(false, ex.getMessage()));
-        }
+        String clientIp = getClientIp(httpRequest);
+        UserDto createdUser = userService.createPrivilegedUser(request, auth.getName(), clientIp);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     private String getClientIp(HttpServletRequest request) {

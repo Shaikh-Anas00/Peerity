@@ -2,7 +2,6 @@ package com.trustreview;
 
 import com.trustreview.dto.CreateAppealRequest;
 import com.trustreview.dto.QuorumStatusDto;
-import com.trustreview.dto.ResolveAppealRequest;
 import com.trustreview.model.*;
 import com.trustreview.repository.*;
 import com.trustreview.service.AnalyticsService;
@@ -90,121 +89,8 @@ class BackendHardeningVerificationTest {
         assertEquals("203.0.113.195", ip, "Must extract client IP from X-Forwarded-For when proxy is trusted");
     }
 
-    // ── Item 2: Quorum Gate Bypass Guard in resolveAppeal ────────────────────
-
-    @Test
-    @DisplayName("Item 2: resolveAppeal throws IllegalStateException while quorum is PENDING_APPROVAL")
-    void resolveAppeal_whileQuorumPending_throwsIllegalStateException() {
-        User student = makeUser("resolve_student@trustreview.edu", Role.STUDENT);
-        User reviewer = makeUser("resolve_reviewer@trustreview.edu", Role.STUDENT);
-        User admin = makeUser("resolve_admin@trustreview.edu", Role.ADMIN);
-        User instructor = makeUser("resolve_instructor@trustreview.edu", Role.INSTRUCTOR);
-
-        Assignment a = new Assignment();
-        a.setTitle("Resolve Guard Test");
-        a.setDescription("desc");
-        a.setRubricCriteria("[\"Quality\"]");
-        a.setDeadline(LocalDateTime.now().plusDays(10));
-        a.setCreatedBy(instructor);
-        a = assignmentRepository.save(a);
-
-        Submission s = new Submission();
-        s.setAssignment(a);
-        s.setAuthor(student);
-        s.setOriginalFileName("test.pdf");
-        s.setFilePath("test.enc");
-        s.setFileHash("hash");
-        s.setFileSize("10 KB");
-        s.setFileType("application/pdf");
-        s.setStatus("SUBMITTED");
-        s.setSubmittedAt(LocalDateTime.now());
-        s = submissionRepository.save(s);
-
-        Review r = new Review();
-        r.setSubmission(s);
-        r.setReviewer(reviewer);
-        r.setReviewerPseudonym("Reviewer-Res");
-        r.setStatus("COMPLETED");
-        r.setScores("{\"Quality\":5}");
-        r.setSubmittedAt(LocalDateTime.now());
-        r = reviewRepository.save(r);
-
-        CreateAppealRequest car = new CreateAppealRequest();
-        car.setReviewId(r.getId());
-        car.setReason(AppealReason.UNFAIR_GRADING_OUTLIER);
-        car.setStatement("Unfair review score");
-        var appealDto = appealService.createAppeal(car, student, "192.168.1.100");
-
-        // Attempt manual resolution while quorum is still PENDING_APPROVAL
-        ResolveAppealRequest req = new ResolveAppealRequest();
-        req.setStatus(AppealStatus.RESOLVED_UPHELD);
-        req.setResolutionNote("Admin manual bypass attempt");
-        req.setApproveDisclosure(true);
-
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
-                appealService.resolveAppeal(appealDto.getId(), req, admin));
-        assertTrue(ex.getMessage().contains("quorum voting is still open"));
-    }
-
-    @Test
-    @WithMockUser(username = "admin@trustreview.edu", roles = "ADMIN")
-    @DisplayName("Item 2: POST /api/appeals/{id}/resolve returns 409 Conflict when quorum is open")
-    void resolveAppealEndpoint_admin_whilePending_returns409() throws Exception {
-        User student = makeUser("resolve_student2@trustreview.edu", Role.STUDENT);
-        User reviewer = makeUser("resolve_reviewer2@trustreview.edu", Role.STUDENT);
-        User instructor = makeUser("resolve_instructor2@trustreview.edu", Role.INSTRUCTOR);
-
-        Assignment a = new Assignment();
-        a.setTitle("Resolve Guard Endpoint Test");
-        a.setDescription("desc");
-        a.setRubricCriteria("[\"Quality\"]");
-        a.setDeadline(LocalDateTime.now().plusDays(10));
-        a.setCreatedBy(instructor);
-        a = assignmentRepository.save(a);
-
-        Submission s = new Submission();
-        s.setAssignment(a);
-        s.setAuthor(student);
-        s.setOriginalFileName("test.pdf");
-        s.setFilePath("test.enc");
-        s.setFileHash("hash");
-        s.setFileSize("10 KB");
-        s.setFileType("application/pdf");
-        s.setStatus("SUBMITTED");
-        s.setSubmittedAt(LocalDateTime.now());
-        s = submissionRepository.save(s);
-
-        Review r = new Review();
-        r.setSubmission(s);
-        r.setReviewer(reviewer);
-        r.setReviewerPseudonym("Reviewer-Res2");
-        r.setStatus("COMPLETED");
-        r.setScores("{\"Quality\":4}");
-        r.setSubmittedAt(LocalDateTime.now());
-        r = reviewRepository.save(r);
-
-        CreateAppealRequest car = new CreateAppealRequest();
-        car.setReviewId(r.getId());
-        car.setReason(AppealReason.UNFAIR_GRADING_OUTLIER);
-        car.setStatement("Unfair score dispute");
-        var appealDto = appealService.createAppeal(car, student, "127.0.0.1");
-
-        mockMvc.perform(post("/api/appeals/" + appealDto.getId() + "/resolve").with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"status\":\"RESOLVED_UPHELD\",\"resolutionNote\":\"bypassed\",\"approveDisclosure\":true}"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Appeal cannot be manually resolved while quorum voting is still open."));
-    }
-
-    @Test
-    @WithMockUser(username = "committee1@trustreview.edu", roles = "COMMITTEE")
-    @DisplayName("Item 2: POST /api/appeals/{id}/resolve as COMMITTEE returns 403 Forbidden (ADMIN only)")
-    void resolveAppealEndpoint_committee_returns403() throws Exception {
-        mockMvc.perform(post("/api/appeals/dummy-id/resolve").with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"status\":\"RESOLVED_UPHELD\",\"resolutionNote\":\"bypassed\",\"approveDisclosure\":true}"))
-                .andExpect(status().isForbidden());
-    }
+    // Item 2 (the single-admin resolveAppeal bypass guard) has been removed along with the
+    // endpoint itself — see P0.2. Disclosure can now only be authorized via quorum voting.
 
     // ── Item 3: Server-side deadline check on submissions ─────────────────────
 

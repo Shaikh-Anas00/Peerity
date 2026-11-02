@@ -2,13 +2,11 @@ package com.trustreview.service;
 
 import com.trustreview.model.User;
 import com.trustreview.repository.UserRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import com.trustreview.security.PeerityUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -28,13 +26,8 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User account is deactivated");
         }
 
-        // Spring Security convention: role prefix "ROLE_"
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                Collections.singletonList(authority)
-        );
+        // Carries the full User entity on the principal so controllers can read it directly
+        // (via @AuthenticationPrincipal PeerityUserDetails) instead of re-querying by email.
+        return new PeerityUserDetails(user);
     }
 }
