@@ -28,7 +28,7 @@ public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final AssignmentRepository assignmentRepository;
     private final ReviewRepository reviewRepository;
-    private final CryptoServiceClient cryptoServiceClient;
+    private final FileCryptoService fileCryptoService;
     private final AuditLedgerService auditLedgerService;
 
     public record DecryptedFilePayload(byte[] data, String originalFileName, String fileType) {}
@@ -36,18 +36,18 @@ public class SubmissionService {
     public SubmissionService(SubmissionRepository submissionRepository,
                              AssignmentRepository assignmentRepository,
                              ReviewRepository reviewRepository,
-                             CryptoServiceClient cryptoServiceClient,
+                             FileCryptoService fileCryptoService,
                              AuditLedgerService auditLedgerService) {
         this.submissionRepository = submissionRepository;
         this.assignmentRepository = assignmentRepository;
         this.reviewRepository = reviewRepository;
-        this.cryptoServiceClient = cryptoServiceClient;
+        this.fileCryptoService = fileCryptoService;
         this.auditLedgerService = auditLedgerService;
     }
 
     /**
-     * Phase 3: Handles multipart file upload, forwards to PHP sidecar for AES-256-GCM
-     * encryption, and persists submission metadata and SHA-256 hash.
+     * Handles multipart file upload, encrypts it in-process with AES-256-GCM, and persists
+     * submission metadata and SHA-256 hash.
      */
     @Transactional
     public SubmissionDto createWithFile(String assignmentId, MultipartFile file, User author) throws IOException {
@@ -67,8 +67,8 @@ public class SubmissionService {
             throw new IllegalArgumentException("You have already submitted work for this assignment.");
         }
 
-        // 1. Forward multipart file to PHP sidecar for AES-256-GCM encryption
-        CryptoEncryptResponse cryptoResp = cryptoServiceClient.encryptFile(file);
+        // 1. Encrypt the file in-process with AES-256-GCM
+        CryptoEncryptResponse cryptoResp = fileCryptoService.encryptFile(file);
 
         // 2. Persist submission record
         Submission s = new Submission();
@@ -116,10 +116,10 @@ public class SubmissionService {
             throw new SecurityException("You are not authorized to download this submission file.");
         }
 
-        logger.info("User {} authorized to download submission {}. Fetching plaintext from PHP sidecar...",
+        logger.info("User {} authorized to download submission {}. Decrypting in-process...",
                 requester.getId(), submissionId);
 
-        byte[] decryptedBytes = cryptoServiceClient.decryptFile(submission.getFilePath());
+        byte[] decryptedBytes = fileCryptoService.decryptFile(submission.getFilePath());
 
         // Double-Blind Filename Masking for Reviewers
         String outputFileName = submission.getOriginalFileName();

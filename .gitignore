@@ -25,7 +25,7 @@ backend/.mvn/apache-maven-*/
 
 # ── Runtime Storage & Uploaded Artifacts ──
 # Strictly prevents student submission binaries and encrypted artifacts from being tracked
-php-service/storage/encrypted/*.enc
+backend/storage/
 *.enc
 uploads/
 **/uploads/
@@ -44,6 +44,8 @@ uploads/
 
 # ── Local Database Dumps & Temp Files ─────
 *.sql
+# ...except versioned Flyway migrations, which must be tracked for the schema to be buildable.
+!backend/src/main/resources/db/migration/*.sql
 *.sqlite
 *.sqlite3
 *.db
