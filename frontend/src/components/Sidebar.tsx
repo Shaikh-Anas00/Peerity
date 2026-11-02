@@ -99,10 +99,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white font-body select-none overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 font-body select-none overflow-hidden">
       {/* ── Logo & Pin Header ─────────────────────────────────────────── */}
       {isExpanded ? (
-        <div className="flex items-center justify-between px-4 h-16 flex-shrink-0 border-b border-slate-100">
+        <div className="flex items-center justify-between px-4 h-16 flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
           <Link
             to="/dashboard"
             onClick={handleHeaderClick}
@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="w-8 h-8 bg-peerity-800 rounded-lg flex items-center justify-center flex-shrink-0 shadow-xs">
               <ShieldCheck className="w-4.5 h-4.5 text-white" strokeWidth={2.25} />
             </div>
-            <span className="text-base font-bold text-slate-900 tracking-tight font-display truncate">
+            <span className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight font-display truncate">
               Peerity
             </span>
           </Link>
@@ -125,25 +125,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
               aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar"}
               className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
                 isPinned
-                  ? "text-peerity-800 bg-peerity-100 hover:bg-peerity-200"
-                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  ? "text-peerity-800 bg-peerity-100 hover:bg-peerity-200 dark:text-teal-400 dark:bg-teal-900/30 dark:hover:bg-teal-900/50"
+                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800"
               }`}
             >
               <Pin
                 className={`w-4 h-4 transition-transform ${
-                  isPinned ? "fill-peerity-800 text-peerity-800 -rotate-45" : "text-slate-500"
+                  isPinned ? "fill-peerity-800 text-peerity-800 dark:fill-teal-400 dark:text-teal-400 -rotate-45" : "text-slate-500 dark:text-slate-400"
                 }`}
               />
             </button>
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-16 flex-shrink-0 border-b border-slate-100">
+        <div className="flex items-center justify-center h-16 flex-shrink-0 border-b border-slate-100 dark:border-slate-800">
           <button
             type="button"
             onClick={handleHeaderClick}
             title={isTouch ? "Tap to open navigation" : "Peerity Dashboard (hover to expand)"}
-            className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-50 transition"
+            className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 transition"
           >
             <div className="w-8 h-8 bg-peerity-800 rounded-lg flex items-center justify-center shadow-xs">
               <ShieldCheck className="w-4.5 h-4.5 text-white" strokeWidth={2.25} />
@@ -172,8 +172,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={({ isActive }) =>
                   `w-11 h-11 mx-auto flex items-center justify-center rounded-xl transition-all duration-150 relative group ${
                     isActive
-                      ? "bg-peerity-100 text-peerity-800 font-semibold shadow-2xs ring-1 ring-peerity-200"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-peerity-100 text-peerity-800 font-semibold shadow-2xs ring-1 ring-peerity-200 dark:bg-teal-900/30 dark:text-teal-400 dark:ring-teal-800"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                   }`
                 }
               >
@@ -192,8 +192,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors font-display ${
                   isActive
-                    ? "bg-peerity-100 text-peerity-800 font-semibold"
-                    : "text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-peerity-100 text-peerity-800 font-semibold dark:bg-teal-900/30 dark:text-teal-400"
+                    : "text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                 }`
               }
             >
@@ -206,47 +206,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* ── User Profile & Sign Out Footer ────────────────────────────── */}
       {isExpanded ? (
-        <div className="flex-shrink-0 border-t border-slate-100 p-3">
+        <div className="flex-shrink-0 border-t border-slate-100 dark:border-slate-800 p-3">
           <Link
             to="/profile"
             onClick={onNavigate}
             title="View Profile"
-            className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-100 transition group"
+            className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition group"
           >
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user.fullName}
-                className="w-9 h-9 rounded-full object-cover border border-peerity-200 flex-shrink-0"
+                className="w-9 h-9 rounded-full object-cover border border-peerity-200 dark:border-teal-800 flex-shrink-0"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-peerity-100 text-peerity-800 flex items-center justify-center text-sm font-bold font-display flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-peerity-100 text-peerity-800 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-sm font-bold font-display flex-shrink-0">
                 {user.fullName?.charAt(0).toUpperCase() ?? "?"}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900 truncate font-display group-hover:text-peerity-800 transition-colors">
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate font-display group-hover:text-peerity-800 dark:group-hover:text-teal-400 transition-colors">
                 {user.fullName}
               </p>
-              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">
+              <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
                 {user.role}
               </p>
             </div>
           </Link>
           <button
             onClick={handleLogout}
-            className="mt-1 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors font-display"
+            className="mt-1 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors font-display"
           >
             <LogOut className="w-[18px] h-[18px]" strokeWidth={1.9} />
             <span className="whitespace-nowrap">Sign out</span>
           </button>
         </div>
       ) : (
-        <div className="flex-shrink-0 border-t border-slate-100 py-3 px-1 flex flex-col items-center gap-2">
+        <div className="flex-shrink-0 border-t border-slate-100 dark:border-slate-800 py-3 px-1 flex flex-col items-center gap-2">
           <Link
             to="/profile"
             onClick={onNavigate}
-            className="w-9 h-9 rounded-full bg-peerity-100 text-peerity-800 flex items-center justify-center text-xs font-bold font-display shadow-2xs hover:ring-2 hover:ring-peerity-600 transition overflow-hidden"
+            className="w-9 h-9 rounded-full bg-peerity-100 text-peerity-800 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-xs font-bold font-display shadow-2xs hover:ring-2 hover:ring-peerity-600 dark:hover:ring-teal-500 transition overflow-hidden"
             title={`${user.fullName} (${user.role}) - View Profile`}
           >
             {user.avatarUrl ? (
@@ -263,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={handleLogout}
             title="Sign out"
             aria-label="Sign out"
-            className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors"
           >
             <LogOut className="w-[18px] h-[18px]" strokeWidth={1.9} />
           </button>

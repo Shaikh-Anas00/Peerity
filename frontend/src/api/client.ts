@@ -1,5 +1,16 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 
+/** Mirrors Spring Data's Page<T> JSON shape, returned by every paginated list endpoint. */
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+}
+
 /**
  * Reads the value of a browser cookie by name.
  * Returns null if the cookie does not exist.
@@ -60,7 +71,7 @@ apiClient.interceptors.response.use(
     // Only redirect if an authenticated API call failed while on a protected route
     if (status === 401 && !url.includes('/auth/me') && !url.includes('/auth/login')) {
       const currentPath = window.location.pathname;
-      const publicPaths = ['/', '/login', '/register', '/unauthorized'];
+      const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/unauthorized'];
       if (!publicPaths.includes(currentPath)) {
         window.location.href = '/login';
       }

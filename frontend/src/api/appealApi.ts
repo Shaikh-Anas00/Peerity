@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, type PageResponse } from "./client";
 
 export type AppealReason =
   | "HARASSMENT_OR_ABUSE"
@@ -91,12 +91,6 @@ export interface CastVotePayload {
   rationale: string;
 }
 
-export interface ResolveAppealPayload {
-  status: "RESOLVED_UPHELD" | "RESOLVED_DISMISSED";
-  approveDisclosure: boolean;
-  resolutionNote?: string;
-}
-
 export interface DisclosedIdentity {
   pseudonym: string;
   level: DisclosureLevel;
@@ -118,11 +112,8 @@ export const appealApi = {
   getMyAppeals: () =>
     apiClient.get<Appeal[]>("/appeals/my-appeals"),
 
-  getPending: () =>
-    apiClient.get<Appeal[]>("/appeals/pending"),
-
-  resolve: (id: string, data: ResolveAppealPayload) =>
-    apiClient.post<Appeal>(`/appeals/${id}/resolve`, data),
+  getPending: (page = 0, size = 20) =>
+    apiClient.get<PageResponse<Appeal>>("/appeals/pending", { params: { page, size } }),
 
   castVote: (id: string, data: CastVotePayload) =>
     apiClient.post<QuorumStatusDto>(`/appeals/${id}/vote`, data),

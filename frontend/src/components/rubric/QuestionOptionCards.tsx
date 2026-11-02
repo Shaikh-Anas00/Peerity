@@ -27,13 +27,17 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
   const questions = criterion.questions ?? [];
 
   const accentClasses = {
-    radioActive: isPurple ? "bg-purple-600 border-purple-600 text-white" : "bg-peerity-800 border-peerity-800 text-white",
+    radioActive: isPurple
+      ? "bg-purple-600 border-purple-600 text-white dark:bg-purple-500 dark:border-purple-500"
+      : "bg-peerity-800 border-peerity-800 text-white dark:bg-teal-600 dark:border-teal-600",
     cardSelected: isPurple
-      ? "border-purple-600 bg-purple-50/80 shadow-xs ring-1 ring-purple-600"
-      : "border-peerity-800 bg-peerity-100/60 shadow-xs ring-1 ring-peerity-800",
+      ? "border-purple-600 bg-purple-50/80 shadow-xs ring-1 ring-purple-600 dark:border-purple-500 dark:bg-purple-950/30 dark:ring-purple-500"
+      : "border-peerity-800 bg-peerity-100/60 shadow-xs ring-1 ring-peerity-800 dark:border-teal-600 dark:bg-teal-900/30 dark:ring-teal-600",
     focusRing: isPurple ? "focus:ring-purple-500" : "focus:ring-peerity-600",
-    headerBadge: isPurple ? "bg-purple-100 text-purple-800" : "bg-peerity-200 text-peerity-900",
-    checkBadge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    headerBadge: isPurple
+      ? "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300"
+      : "bg-peerity-200 text-peerity-900 dark:bg-teal-900/40 dark:text-teal-300",
+    checkBadge: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50",
   };
 
   const handleSelectOption = (qIdx: number, scoreValue: number) => {
@@ -49,7 +53,7 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
 
   if (questions.length === 0) {
     return (
-      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs text-center font-body">
+      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs text-center font-body">
         No questions defined for this criterion.
       </div>
     );
@@ -64,7 +68,7 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
         return (
           <div
             key={qIdx}
-            className="rounded-xl border border-slate-200 bg-white p-4.5 shadow-2xs transition-shadow hover:shadow-xs"
+            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4.5 shadow-2xs transition-shadow hover:shadow-xs"
           >
             {/* Question Header */}
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -74,7 +78,7 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
                 >
                   Q{qIdx + 1}
                 </span>
-                <p className="text-xs font-semibold text-slate-800 font-display leading-snug">
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 font-display leading-snug">
                   {q.prompt}
                 </p>
               </div>
@@ -110,7 +114,7 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
                     className={`w-full text-left p-3 rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 ${accentClasses.focusRing} disabled:opacity-50 disabled:cursor-not-allowed ${
                       isSelected
                         ? accentClasses.cardSelected
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -119,7 +123,7 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
                         className={`w-4 h-4 rounded-full flex items-center justify-center border flex-shrink-0 mt-0.5 transition-colors ${
                           isSelected
                             ? accentClasses.radioActive
-                            : "border-slate-300 bg-white"
+                            : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800"
                         }`}
                       >
                         {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
@@ -128,7 +132,7 @@ export const QuestionOptionCards: React.FC<QuestionOptionCardsProps> = ({
                       {/* Full-sentence option description */}
                       <span
                         className={`text-xs font-body leading-relaxed flex-1 ${
-                          isSelected ? "text-slate-900 font-medium" : "text-slate-700"
+                          isSelected ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         {opt.text}

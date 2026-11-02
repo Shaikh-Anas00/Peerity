@@ -125,12 +125,12 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
   const isDesktopExpanded = isPinned || (isTouch ? isTouchExpanded : isHovered);
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-slate-50 overflow-hidden">
+    <div className="h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 overflow-hidden">
       {/* ── Desktop: Collapsible Icon-Rail Sidebar ───────────────────── */}
       <aside
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`hidden md:block flex-shrink-0 relative z-40 transition-[width] duration-200 ease-in-out border-r border-slate-200 bg-white overflow-hidden ${
+        className={`hidden md:block flex-shrink-0 relative z-40 transition-[width] duration-200 ease-in-out border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden ${
           isDesktopExpanded ? "w-64" : "w-[68px]"
         }`}
       >
@@ -160,18 +160,18 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
       )}
 
       {/* ── Mobile: Slim top bar + drawer (< md) ────────────────────── */}
-      <header className="md:hidden flex items-center justify-between h-14 px-4 flex-shrink-0 bg-white border-b border-slate-200">
+      <header className="md:hidden flex items-center justify-between h-14 px-4 flex-shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-peerity-800 rounded-lg flex items-center justify-center">
             <ShieldCheck className="w-4 h-4 text-white" strokeWidth={2.25} />
           </div>
-          <span className="text-sm font-bold text-slate-900 tracking-tight font-display">
+          <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight font-display">
             Peerity
           </span>
         </div>
         <button
           onClick={() => setDrawerOpen(true)}
-          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
+          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
@@ -193,7 +193,7 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
             />
             <button
               onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-3 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="absolute top-4 right-3 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
               aria-label="Close menu"
             >
               <X className="w-4 h-4" />

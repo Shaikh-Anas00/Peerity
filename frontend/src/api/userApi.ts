@@ -34,4 +34,6 @@ export const userApi = {
   verifyPassword: (currentPassword: string) => apiClient.post<{ success: boolean; message: string }>('/users/verify-password', { currentPassword }),
   changePassword: (data: ChangePasswordPayload) => apiClient.post<{ success: boolean; message: string }>('/users/change-password', data),
   requestDataAction: (data: DataRequestPayload) => apiClient.post<User>('/users/data-request', data),
+  /** Real-time GDPR export — downloads the caller's own profile/submissions/reviews/appeals as a JSON file. */
+  exportMyData: () => apiClient.get<Blob>('/users/me/export', { responseType: 'blob' }),
 };

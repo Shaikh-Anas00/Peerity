@@ -211,8 +211,8 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
     c => typeof c.weight === "number" && (c.weight as number) > 0
   );
 
-  let compositePct = 0;
-  let compositePoints = 0;
+  let compositePct: number;
+  let compositePoints: number;
 
   if (hasWeights) {
     let weightedSum = 0;
@@ -240,12 +240,18 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
   // Accent styles
   const isPurple = accentColor === "purple";
   const accentClasses = {
-    bgSolid: isPurple ? "bg-purple-600 hover:bg-purple-700" : "bg-peerity-800 hover:bg-peerity-900",
-    bgPillActive: isPurple ? "bg-purple-600 text-white border-purple-600" : "bg-peerity-800 text-white border-peerity-800",
-    bgLight: isPurple ? "bg-purple-50/70 border-purple-200" : "bg-peerity-100/40 border-peerity-200",
-    badgeNumber: isPurple ? "bg-purple-600 text-white" : "bg-peerity-800 text-white",
-    textPrimary: isPurple ? "text-purple-600" : "text-peerity-800",
-    progressFill: isPurple ? "bg-purple-600" : "bg-peerity-600",
+    bgSolid: isPurple
+      ? "bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-500"
+      : "bg-peerity-800 hover:bg-peerity-900 dark:bg-teal-600 dark:hover:bg-teal-500",
+    bgPillActive: isPurple
+      ? "bg-purple-600 text-white border-purple-600 dark:bg-purple-600 dark:border-purple-600"
+      : "bg-peerity-800 text-white border-peerity-800 dark:bg-teal-600 dark:border-teal-600",
+    bgLight: isPurple
+      ? "bg-purple-50/70 border-purple-200 dark:bg-purple-950/30 dark:border-purple-900/50"
+      : "bg-peerity-100/40 border-peerity-200 dark:bg-teal-950/30 dark:border-teal-900/50",
+    badgeNumber: isPurple ? "bg-purple-600 text-white" : "bg-peerity-800 text-white dark:bg-teal-600",
+    textPrimary: isPurple ? "text-purple-600 dark:text-purple-400" : "text-peerity-800 dark:text-teal-400",
+    progressFill: isPurple ? "bg-purple-600 dark:bg-purple-500" : "bg-peerity-600 dark:bg-teal-500",
     focusRing: isPurple ? "focus:ring-purple-500" : "focus:ring-peerity-600",
   };
 
@@ -286,19 +292,19 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
   };
 
   return (
-    <div className={`flex flex-col h-full bg-white font-body ${className}`}>
+    <div className={`flex flex-col h-full bg-white dark:bg-slate-900 font-body ${className}`}>
       {/* ── Top Header / Stepper Bar ────────────────────────────────────────── */}
-      <div className="px-5 py-3.5 border-b border-slate-100 flex-shrink-0 bg-slate-50/60">
+      <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex-shrink-0 bg-slate-50/60 dark:bg-slate-800/40">
         {(title || headerExtra) && (
           <div className="flex items-center justify-between mb-2">
             <div className="min-w-0 pr-2">
               {title && (
-                <div className="text-sm font-bold text-slate-900 font-display leading-tight truncate">
+                <div className="text-sm font-bold text-slate-900 dark:text-slate-100 font-display leading-tight truncate">
                   {title}
                 </div>
               )}
               {subtitle && (
-                <div className="text-xs text-slate-500 font-body truncate mt-0.5">
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-body truncate mt-0.5">
                   {subtitle}
                 </div>
               )}
@@ -309,7 +315,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
 
         {/* Progress label & bar */}
         <div className="mt-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1 font-body">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-1 font-body">
             <span>
               Step {step + 1} of {totalSteps}
               {isFeedbackStep ? ` · ${feedbackLabel}` : ` · ${currentCriterion?.name}`}
@@ -318,7 +324,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
               {progressPct}% completed
             </span>
           </div>
-          <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
               className={`h-full ${accentClasses.progressFill} rounded-full transition-all duration-300`}
               style={{ width: `${progressPct}%` }}
@@ -343,13 +349,13 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                   isCurrent
                     ? accentClasses.bgPillActive
                     : isCompleted
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/60"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 dark:hover:bg-emerald-950/60"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600"
                 }`}
                 title={c.name}
               >
                 {isCompleted && !isCurrent ? (
-                  <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 ) : (
                   <span className="w-3 text-center">{i + 1}</span>
                 )}
@@ -368,13 +374,13 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
               isFeedbackStep
                 ? accentClasses.bgPillActive
                 : feedback.trim().length >= feedbackMinLength
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/60"
-                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 dark:hover:bg-emerald-950/60"
+                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-slate-600"
             }`}
             title={feedbackLabel}
           >
             {feedback.trim().length >= feedbackMinLength && !isFeedbackStep ? (
-              <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+              <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             ) : (
               <Send className="w-2.5 h-2.5 flex-shrink-0" />
             )}
@@ -385,22 +391,22 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
 
       {/* ── Optional Overall Score Bar ──────────────────────────────────────── */}
       {showOverallBar && (
-        <div className="px-5 py-2 border-b border-slate-100 bg-slate-50/80 flex-shrink-0">
+        <div className="px-5 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/40 flex-shrink-0">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-display">
+            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-display">
               {hasWeights ? "Weighted Composite Score" : "Overall Score"}
             </span>
             <span className={`text-sm font-bold font-display ${accentClasses.textPrimary}`}>
               {compositePct}%
             </span>
           </div>
-          <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
               className={`h-full ${accentClasses.progressFill} rounded-full transition-all duration-200`}
               style={{ width: `${compositePct}%` }}
             />
           </div>
-          <p className="text-[10px] text-slate-400 mt-0.5 font-body">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 font-body">
             {scoredCount} of {normalizedCriteria.length} scored &bull; Avg {compositePoints.toFixed(1)} / 10
             {hasWeights && " (weighted)"}
           </p>
@@ -413,7 +419,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
         {renderCustomTop}
 
         {isPast && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+          <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-xs flex items-start gap-2">
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span>{disabledMessage}</span>
           </div>
@@ -431,11 +437,11 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                     {step + 1}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 font-display">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-display">
                       {currentCriterion.name}
                     </h4>
                     {currentCriterion.description && (
-                      <p className="text-xs text-slate-600 mt-0.5 font-body leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-body leading-relaxed">
                         {currentCriterion.description}
                       </p>
                     )}
@@ -443,7 +449,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                 </div>
 
                 {currentCriterion.weight && (
-                  <span className="text-[11px] font-semibold px-2 py-0.5 bg-white border border-slate-200 text-slate-600 rounded-md font-mono flex-shrink-0">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-md font-mono flex-shrink-0">
                     Weight: {currentCriterion.weight}%
                   </span>
                 )}
@@ -451,7 +457,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
 
               {isQuestionBased(currentCriterion) ? (
                 <>
-                  <p className="text-[11px] text-slate-500 font-medium mb-3 mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mb-3 mt-1">
                     Answer each question by selecting the statement that best describes the work:
                   </p>
                   <QuestionOptionCards
@@ -484,7 +490,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                 </>
               ) : (
                 <>
-                  <p className="text-[11px] text-slate-500 font-medium mb-3 mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mb-3 mt-1">
                     Select the performance level that best describes this submission:
                   </p>
 
@@ -512,9 +518,9 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                           className={`w-full text-left p-3.5 rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 ${accentClasses.focusRing} disabled:opacity-50 ${
                             isSelected
                               ? isPurple
-                                ? "border-purple-600 bg-purple-50/80 shadow-xs ring-1 ring-purple-600"
-                                : "border-peerity-800 bg-peerity-100/60 shadow-xs ring-1 ring-peerity-800"
-                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
+                                ? "border-purple-600 bg-purple-50/80 shadow-xs ring-1 ring-purple-600 dark:border-purple-500 dark:bg-purple-950/30 dark:ring-purple-500"
+                                : "border-peerity-800 bg-peerity-100/60 shadow-xs ring-1 ring-peerity-800 dark:border-teal-600 dark:bg-teal-900/30 dark:ring-teal-600"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -523,16 +529,16 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                                 className={`w-4.5 h-4.5 rounded-full flex items-center justify-center border flex-shrink-0 transition-colors ${
                                   isSelected
                                     ? isPurple
-                                      ? "bg-purple-600 border-purple-600 text-white"
-                                      : "bg-peerity-800 border-peerity-800 text-white"
-                                    : "border-slate-300 bg-white"
+                                      ? "bg-purple-600 border-purple-600 text-white dark:bg-purple-500 dark:border-purple-500"
+                                      : "bg-peerity-800 border-peerity-800 text-white dark:bg-teal-600 dark:border-teal-600"
+                                    : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800"
                                 }`}
                               >
                                 {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                               </div>
                               <span
                                 className={`text-xs font-bold font-display ${
-                                  isSelected ? "text-slate-900" : "text-slate-700"
+                                  isSelected ? "text-slate-900 dark:text-slate-100" : "text-slate-700 dark:text-slate-300"
                                 }`}
                               >
                                 {lvl.label}
@@ -543,9 +549,9 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                               className={`text-[10px] font-semibold font-mono px-2 py-0.5 rounded ${
                                 isSelected
                                   ? isPurple
-                                    ? "bg-purple-100 text-purple-800"
-                                    : "bg-peerity-200 text-peerity-900"
-                                  : "bg-slate-100 text-slate-600"
+                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300"
+                                    : "bg-peerity-200 text-peerity-900 dark:bg-teal-900/40 dark:text-teal-300"
+                                  : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
                               }`}
                             >
                               {lvl.scoreRange ?? `${lvl.score} pts`}
@@ -553,7 +559,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                           </div>
 
                           {lvl.description && (
-                            <p className="text-[11px] text-slate-600 mt-1.5 pl-7 font-body leading-relaxed">
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 pl-7 font-body leading-relaxed">
                               {lvl.description}
                             </p>
                           )}
@@ -567,8 +573,8 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
 
             {/* Other Criteria Progress List */}
             {normalizedCriteria.length > 1 && (
-              <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 font-display">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3.5 shadow-xs">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 font-display">
                   Other Criteria
                 </p>
                 <div className="space-y-1.5">
@@ -580,17 +586,17 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                       const displayLabel = matchedLevel?.label ?? (s !== undefined ? levelLabelForScore(s) : null);
                       return (
                         <div key={c.name} className="flex items-center justify-between text-xs py-0.5">
-                          <span className="text-slate-600 truncate flex-1 pr-2 font-body">
+                          <span className="text-slate-600 dark:text-slate-400 truncate flex-1 pr-2 font-body">
                             {c.name}
                           </span>
                           <span className="font-body text-[11px]">
                             {displayLabel ? (
                               <span className="inline-flex items-center gap-1">
-                                <span className="font-semibold text-slate-800">{displayLabel}</span>
-                                <span className="text-slate-400 font-mono">({s}/10)</span>
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">{displayLabel}</span>
+                                <span className="text-slate-400 dark:text-slate-500 font-mono">({s}/10)</span>
                               </span>
                             ) : (
-                              <span className="text-slate-400 italic">Unscored</span>
+                              <span className="text-slate-400 dark:text-slate-500 italic">Unscored</span>
                             )}
                           </span>
                         </div>
@@ -607,11 +613,11 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
           <div className="space-y-4">
             {/* Unscored criteria alert if any */}
             {!allScored && (
-              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-600" />
+              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-300 text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
                 <div className="flex-1">
                   <p className="font-bold">Incomplete Rubric Scoring</p>
-                  <p className="mt-0.5 text-amber-700">
+                  <p className="mt-0.5 text-amber-700 dark:text-amber-400">
                     {unscoredCriteria.length} criteria still need a performance level selection:{" "}
                     {unscoredCriteria.map((u, i) => (
                       <button
@@ -620,7 +626,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                         onClick={() =>
                           goToStep(normalizedCriteria.findIndex(c => c.name === u.name))
                         }
-                        className="underline font-bold mr-1 hover:text-amber-950 inline-block"
+                        className="underline font-bold mr-1 hover:text-amber-950 dark:hover:text-amber-200 inline-block"
                       >
                         {u.name}
                         {i < unscoredCriteria.length - 1 ? "," : ""}
@@ -632,8 +638,8 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
             )}
 
             {/* Complete score summary table */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 shadow-xs">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2.5 font-display">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/40 p-4 shadow-xs">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2.5 font-display">
                 Score Summary
               </p>
               <div className="space-y-2">
@@ -645,37 +651,37 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                   return (
                     <div
                       key={c.name}
-                      className="flex items-center justify-between text-xs py-1 border-b border-slate-200/60 last:border-0"
+                      className="flex items-center justify-between text-xs py-1 border-b border-slate-200/60 dark:border-slate-700/60 last:border-0"
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <span className="text-slate-400 font-mono font-semibold text-[11px]">
+                        <span className="text-slate-400 dark:text-slate-500 font-mono font-semibold text-[11px]">
                           {idx + 1}.
                         </span>
                         <button
                           type="button"
                           onClick={() => goToStep(idx)}
-                          className="text-slate-700 hover:text-slate-900 font-medium truncate text-left hover:underline"
+                          className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-medium truncate text-left hover:underline"
                         >
                           {c.name}
                         </button>
                         {c.weight && (
-                          <span className="text-[10px] text-slate-400 font-mono">({c.weight}%)</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({c.weight}%)</span>
                         )}
                       </div>
 
                       <div className="flex-shrink-0 text-right">
                         {displayLabel ? (
                           <span className="inline-flex items-center gap-1.5">
-                            <span className="font-semibold text-slate-800">{displayLabel}</span>
-                            <span className="font-mono text-slate-500 font-semibold">({s}/10)</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{displayLabel}</span>
+                            <span className="font-mono text-slate-500 dark:text-slate-400 font-semibold">({s}/10)</span>
                           </span>
                         ) : (
                           <button
                             type="button"
                             onClick={() => goToStep(idx)}
-                            className="text-amber-600 font-bold hover:underline"
+                            className="text-amber-600 dark:text-amber-400 font-bold hover:underline"
                           >
-                            {isQuestionBased(c) ? "Answer Questions \u2192" : "Select Level \u2192"}
+                            {isQuestionBased(c) ? "Answer Questions →" : "Select Level →"}
                           </button>
                         )}
                       </div>
@@ -684,8 +690,8 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                 })}
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600 font-body">
+              <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 font-body">
                   {hasWeights ? "Weighted Composite Score" : "Overall Composite Score"}
                 </span>
                 <span className={`text-sm font-bold font-display ${accentClasses.textPrimary}`}>
@@ -696,8 +702,8 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
 
             {/* Written feedback input */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 font-display">
-                {feedbackLabel} {requireFeedback && <span className="text-red-500">*</span>}
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 font-display">
+                {feedbackLabel} {requireFeedback && <span className="text-red-500 dark:text-red-400">*</span>}
               </label>
               <textarea
                 value={feedback}
@@ -705,9 +711,9 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                 rows={feedbackRows}
                 disabled={isPast}
                 placeholder={isPast ? disabledMessage : feedbackPlaceholder}
-                className={`w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 ${accentClasses.focusRing} resize-none disabled:bg-slate-100 disabled:text-slate-500 font-body leading-relaxed`}
+                className={`w-full px-3.5 py-2.5 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 ${accentClasses.focusRing} resize-none disabled:bg-slate-100 disabled:text-slate-500 dark:disabled:bg-slate-800/50 dark:disabled:text-slate-500 font-body leading-relaxed`}
               />
-              <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1 font-body">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 mt-1 font-body">
                 <span>
                   {feedback.length} characters
                   {requireFeedback && feedbackMinLength > 0 && (
@@ -715,7 +721,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
                   )}
                 </span>
                 {requireFeedback && feedback.trim().length < feedbackMinLength && (
-                  <span className="text-amber-600 font-medium">
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">
                     {feedbackMinLength - feedback.trim().length} more needed
                   </span>
                 )}
@@ -723,7 +729,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-xs flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -733,14 +739,14 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
       </div>
 
       {/* ── Fixed Navigation Footer ─────────────────────────────────────────── */}
-      <div className="px-5 py-3 border-t border-slate-100 bg-white flex-shrink-0 space-y-2">
+      <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0 space-y-2">
         <div className="flex gap-2.5 font-display">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="px-3.5 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition disabled:opacity-40"
+              className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition disabled:opacity-40"
             >
               Cancel
             </button>
@@ -750,7 +756,7 @@ export const SteppedCriterionScoring: React.FC<SteppedCriterionScoringProps> = (
             type="button"
             onClick={handlePrev}
             disabled={step === 0 || isSubmitting}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 transition"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             Previous

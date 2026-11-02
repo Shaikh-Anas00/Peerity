@@ -25,8 +25,8 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
     rubricTemplateApi
       .getAll()
       .then((res) => {
-        if (mounted && Array.isArray(res.data)) {
-          setBackendTemplates(res.data);
+        if (mounted && Array.isArray(res.data?.content)) {
+          setBackendTemplates(res.data.content);
         }
       })
       .catch((err) => {
@@ -44,13 +44,13 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "CODING":
-        return <Code2 className="w-4 h-4 text-emerald-600" />;
+        return <Code2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
       case "ESSAY":
-        return <FileText className="w-4 h-4 text-blue-600" />;
+        return <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
       case "PRESENTATION":
-        return <Presentation className="w-4 h-4 text-purple-600" />;
+        return <Presentation className="w-4 h-4 text-purple-600 dark:text-purple-400" />;
       default:
-        return <BookOpen className="w-4 h-4 text-slate-600" />;
+        return <BookOpen className="w-4 h-4 text-slate-600 dark:text-slate-400" />;
     }
   };
 
@@ -101,20 +101,20 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
   return (
     <div className="space-y-3 font-body">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 font-display">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 font-display">
           Starter Rubric Templates
         </label>
 
         {/* Tab switch between Question-Based and Scale-Based */}
-        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+        <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-0.5">
           <button
             type="button"
             disabled={disabled}
             onClick={() => setActiveTab("question_based")}
             className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition ${
               activeTab === "question_based"
-                ? "bg-white text-peerity-900 shadow-2xs font-bold"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-700 text-peerity-900 dark:text-teal-300 shadow-2xs font-bold"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             Question-Based (New)
@@ -125,8 +125,8 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
             onClick={() => setActiveTab("scale_based")}
             className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition ${
               activeTab === "scale_based"
-                ? "bg-white text-peerity-900 shadow-2xs font-bold"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-700 text-peerity-900 dark:text-teal-300 shadow-2xs font-bold"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             Scale with Levels
@@ -146,23 +146,23 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
                 onClick={() => handleSelectBackendTemplate(tpl)}
                 className={`text-left p-3 rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-peerity-600 ${
                   isSelected
-                    ? "border-peerity-800 bg-peerity-100/60 ring-1 ring-peerity-800 shadow-xs"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-2xs"
+                    ? "border-peerity-800 bg-peerity-100/60 ring-1 ring-peerity-800 shadow-xs dark:border-teal-600 dark:bg-teal-900/30 dark:ring-teal-600"
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-2xs dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className="p-1 rounded-md bg-slate-100">{getCategoryIcon(tpl.category)}</div>
-                  <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <div className="p-1 rounded-md bg-slate-100 dark:bg-slate-800">{getCategoryIcon(tpl.category)}</div>
+                  <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50">
                     Questions
                   </span>
                 </div>
-                <h5 className="text-xs font-bold text-slate-900 font-display line-clamp-1">
+                <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 font-display line-clamp-1">
                   {tpl.name}
                 </h5>
-                <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-snug">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-snug">
                   {tpl.description}
                 </p>
-                <div className="text-[10px] text-slate-400 font-medium mt-2">
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-2">
                   {tpl.criteria?.length ?? 0} Criteria
                 </div>
               </button>
@@ -176,23 +176,23 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
             onClick={handleSelectBlank}
             className={`text-left p-3 rounded-xl border border-dashed transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-peerity-600 ${
               selectedTemplateId === "custom"
-                ? "border-peerity-800 bg-peerity-100/60 ring-1 ring-peerity-800"
-                : "border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50/70"
+                ? "border-peerity-800 bg-peerity-100/60 ring-1 ring-peerity-800 dark:border-teal-600 dark:bg-teal-900/30 dark:ring-teal-600"
+                : "border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50/70 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-slate-500 dark:hover:bg-slate-800/70"
             }`}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <div className="p-1 rounded-md bg-slate-100">
-                <Sparkles className="w-4 h-4 text-amber-600" />
+              <div className="p-1 rounded-md bg-slate-100 dark:bg-slate-800">
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+              <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 Custom
               </span>
             </div>
-            <h5 className="text-xs font-bold text-slate-900 font-display">Blank Rubric</h5>
-            <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-snug">
+            <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 font-display">Blank Rubric</h5>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-snug">
               Start from scratch and define your own custom criteria and questions.
             </p>
-            <div className="text-[10px] text-slate-400 font-medium mt-2">1 Blank Criterion</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-2">1 Blank Criterion</div>
           </button>
         </div>
       ) : (
@@ -207,25 +207,25 @@ export const TemplatePicker: React.FC<TemplatePickerProps> = ({
                 onClick={() => handleSelectScaleTemplate(tpl.id)}
                 className={`text-left p-3 rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-peerity-600 ${
                   isSelected
-                    ? "border-peerity-800 bg-peerity-100/60 ring-1 ring-peerity-800 shadow-xs"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-2xs"
+                    ? "border-peerity-800 bg-peerity-100/60 ring-1 ring-peerity-800 shadow-xs dark:border-teal-600 dark:bg-teal-900/30 dark:ring-teal-600"
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 shadow-2xs dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800/70"
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className="p-1 rounded-md bg-slate-100">
-                    <Sliders className="w-4 h-4 text-slate-600" />
+                  <div className="p-1 rounded-md bg-slate-100 dark:bg-slate-800">
+                    <Sliders className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                   </div>
-                  <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                  <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50">
                     Levels (4)
                   </span>
                 </div>
-                <h5 className="text-xs font-bold text-slate-900 font-display line-clamp-1">
+                <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 font-display line-clamp-1">
                   {tpl.name}
                 </h5>
-                <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-snug">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-snug">
                   {tpl.description}
                 </p>
-                <div className="text-[10px] text-slate-400 font-medium mt-2">
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-2">
                   {tpl.criteria.length} Criteria
                 </div>
               </button>

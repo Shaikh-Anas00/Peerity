@@ -111,8 +111,8 @@ export const AnalyticsPage: React.FC = () => {
           </div>
         </div>
       ) : !data ? (
-        <div className="text-center py-20 text-slate-400 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-          <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-400" />
+        <div className="text-center py-20 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-400 dark:text-slate-500" />
           <p className="font-semibold text-slate-700 dark:text-slate-200 font-display">Failed to load analytics data</p>
           <p className="text-xs text-slate-400 mt-1 font-body">Please refresh the page or check back later.</p>
         </div>
@@ -212,7 +212,7 @@ export const AnalyticsPage: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <PieIcon className="w-5 h-5 text-amber-600" />
+                  <PieIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                   <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Dispute Reasons Breakdown</h3>
                 </div>
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-body">{data.disputeMetrics.totalDisputes} Filed</span>
@@ -254,7 +254,7 @@ export const AnalyticsPage: React.FC = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="text-center text-slate-400 text-xs py-12">
+                  <div className="text-center text-slate-400 dark:text-slate-500 text-xs py-12">
                     No disputes filed yet.
                   </div>
                 )}

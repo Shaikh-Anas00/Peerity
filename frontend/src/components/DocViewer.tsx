@@ -165,7 +165,7 @@ const PdfPageItem: React.FC<PageCanvasProps> = ({
       className="flex flex-col items-center my-4 group"
     >
       <div
-        className="bg-white rounded-lg shadow-md border border-slate-300/80 overflow-hidden transition-shadow group-hover:shadow-lg relative"
+        className="bg-white dark:bg-slate-800 rounded-lg shadow-md border border-slate-300/80 dark:border-slate-600 overflow-hidden transition-shadow group-hover:shadow-lg relative"
         style={{
           width: pageSize.width,
           minHeight: pageSize.height,
@@ -174,17 +174,17 @@ const PdfPageItem: React.FC<PageCanvasProps> = ({
         <canvas ref={canvasRef} className="block" />
         {!rendered && (
           <div
-            className="absolute inset-0 flex items-center justify-center bg-slate-50 text-slate-400 text-xs font-mono"
+            className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 text-xs font-mono"
             style={{ width: pageSize.width, height: pageSize.height }}
           >
             <div className="flex flex-col items-center gap-2">
-              <div className="w-5 h-5 border-2 border-peerity-600 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-peerity-600 dark:border-teal-500 border-t-transparent rounded-full animate-spin" />
               <span>Rendering Page {pageNum}…</span>
             </div>
           </div>
         )}
       </div>
-      <div className="mt-1 text-[11px] font-medium text-slate-500 font-mono tracking-tight select-none">
+      <div className="mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 font-mono tracking-tight select-none">
         Page {pageNum}
       </div>
     </div>
@@ -411,12 +411,12 @@ export const DocViewer: React.FC<DocViewerProps> = ({
   }, [textContent]);
 
   return (
-    <div className="flex flex-col h-full bg-slate-100 border-r border-slate-200 select-none overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 select-none overflow-hidden">
       {/* ── TOP TOOLBAR ─────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-white border-b border-slate-200 flex-shrink-0 flex-wrap">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 flex-wrap">
         {/* Left: Document info & icon */}
         <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-initial">
-          <div className="w-7 h-7 rounded-lg bg-peerity-100 text-peerity-800 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-peerity-100 text-peerity-800 dark:bg-teal-950/40 dark:text-teal-400 flex items-center justify-center flex-shrink-0">
             {isPdf ? (
               <FileText className="w-4 h-4" />
             ) : isImage ? (
@@ -428,10 +428,10 @@ export const DocViewer: React.FC<DocViewerProps> = ({
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-slate-800 truncate font-display" title={fileName}>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate font-display" title={fileName}>
               {fileName}
             </p>
-            <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+            <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono">
               {formattedFileSize && <span>{formattedFileSize}</span>}
               {isPdf && totalPages > 0 && (
                 <>
@@ -447,15 +447,15 @@ export const DocViewer: React.FC<DocViewerProps> = ({
         {isPdf && pdfDoc && (
           <div className="flex items-center gap-2 flex-wrap">
             {/* View Mode Toggle: Continuous vs Single */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => setViewMode("continuous")}
                 title="Continuous Vertical Scroll"
                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition ${
                   viewMode === "continuous"
-                    ? "bg-white text-peerity-800 shadow-2xs font-semibold"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-peerity-800 shadow-2xs font-semibold dark:bg-slate-700 dark:text-teal-400"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 <Scroll className="w-3.5 h-3.5" />
@@ -467,8 +467,8 @@ export const DocViewer: React.FC<DocViewerProps> = ({
                 title="Single Page Presentation"
                 className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition ${
                   viewMode === "single"
-                    ? "bg-white text-peerity-800 shadow-2xs font-semibold"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-peerity-800 shadow-2xs font-semibold dark:bg-slate-700 dark:text-teal-400"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
@@ -477,7 +477,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
             </div>
 
             {/* Page navigation / jump */}
-            <div className="flex items-center gap-1 border border-slate-200 rounded-lg bg-white px-1 py-0.5">
+            <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 px-1 py-0.5">
               <button
                 type="button"
                 onClick={() => {
@@ -489,7 +489,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
                   }
                 }}
                 disabled={currentPage <= 1}
-                className="p-1 text-slate-500 hover:bg-slate-100 rounded disabled:opacity-30 transition"
+                className="p-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30 transition"
                 title="Previous page"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
@@ -501,10 +501,10 @@ export const DocViewer: React.FC<DocViewerProps> = ({
                   value={jumpPageInput}
                   onChange={(e) => setJumpPageInput(e.target.value)}
                   onBlur={handlePageJump}
-                  className="w-8 text-center text-xs font-mono font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded py-0.5 focus:outline-none focus:ring-1 focus:ring-peerity-600"
+                  className="w-8 text-center text-xs font-mono font-medium text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded py-0.5 focus:outline-none focus:ring-1 focus:ring-peerity-600 dark:focus:ring-teal-500"
                   title="Jump to page number"
                 />
-                <span className="text-xs font-mono text-slate-400 select-none">
+                <span className="text-xs font-mono text-slate-400 dark:text-slate-500 select-none">
                   / {totalPages}
                 </span>
               </form>
@@ -520,7 +520,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
                   }
                 }}
                 disabled={currentPage >= totalPages}
-                className="p-1 text-slate-500 hover:bg-slate-100 rounded disabled:opacity-30 transition"
+                className="p-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30 transition"
                 title="Next page"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -528,12 +528,12 @@ export const DocViewer: React.FC<DocViewerProps> = ({
             </div>
 
             {/* Zoom Controls */}
-            <div className="flex items-center gap-1 border border-slate-200 rounded-lg bg-white px-1 py-0.5">
+            <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 px-1 py-0.5">
               <button
                 type="button"
                 onClick={() => handleZoom("out")}
                 disabled={scale <= 0.4}
-                className="p-1 text-slate-500 hover:bg-slate-100 rounded disabled:opacity-30 transition"
+                className="p-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30 transition"
                 title="Zoom Out"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
@@ -542,7 +542,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
               <button
                 type="button"
                 onClick={handleResetZoom}
-                className="px-1.5 text-xs font-mono text-slate-700 hover:text-peerity-800 transition font-medium select-none"
+                className="px-1.5 text-xs font-mono text-slate-700 dark:text-slate-300 hover:text-peerity-800 dark:hover:text-teal-400 transition font-medium select-none"
                 title="Reset to 100%"
               >
                 {Math.round(scale * 100)}%
@@ -552,18 +552,18 @@ export const DocViewer: React.FC<DocViewerProps> = ({
                 type="button"
                 onClick={() => handleZoom("in")}
                 disabled={scale >= 3.0}
-                className="p-1 text-slate-500 hover:bg-slate-100 rounded disabled:opacity-30 transition"
+                className="p-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30 transition"
                 title="Zoom In"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
               </button>
 
-              <div className="h-3.5 w-px bg-slate-200 mx-0.5" />
+              <div className="h-3.5 w-px bg-slate-200 dark:bg-slate-700 mx-0.5" />
 
               <button
                 type="button"
                 onClick={handleFitWidth}
-                className="px-1.5 py-0.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-peerity-800 rounded transition font-display"
+                className="px-1.5 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-peerity-800 dark:hover:text-teal-400 rounded transition font-display"
                 title="Fit to Width"
               >
                 Fit
@@ -574,7 +574,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
             <button
               type="button"
               onClick={handleRotate}
-              className="p-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-lg transition"
+              className="p-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-lg transition dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400"
               title={`Rotate 90° clockwise (current: ${rotation}°)`}
             >
               <RotateCw className="w-3.5 h-3.5" />
@@ -588,7 +588,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
             <button
               type="button"
               onClick={onToggleMaximize}
-              className="p-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-lg transition"
+              className="p-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-lg transition dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400"
               title={isMaximized ? "Restore Split View" : "Maximize Document View"}
             >
               {isMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -599,7 +599,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
             type="button"
             onClick={onDownload}
             disabled={isDownloading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-peerity-800 hover:bg-peerity-600 text-white rounded-lg text-xs font-semibold transition shadow-2xs disabled:opacity-50 font-display flex-shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-peerity-800 hover:bg-peerity-600 text-white rounded-lg text-xs font-semibold transition shadow-2xs disabled:opacity-50 font-display flex-shrink-0 dark:bg-teal-600 dark:hover:bg-teal-500"
             title="Download decrypted file directly"
           >
             {isDownloading ? (
@@ -615,28 +615,28 @@ export const DocViewer: React.FC<DocViewerProps> = ({
       {/* ── VIEWER BODY (SCROLLABLE CONTAINER) ─────────────────────────── */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto bg-slate-200/90 flex flex-col items-center relative p-3"
+        className="flex-1 overflow-auto bg-slate-200/90 dark:bg-slate-900 flex flex-col items-center relative p-3"
       >
         {/* Loading state */}
         {loading && (
-          <div className="flex flex-col items-center justify-center my-auto gap-3 text-slate-500 py-12">
-            <div className="w-10 h-10 border-3 border-peerity-800 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center my-auto gap-3 text-slate-500 dark:text-slate-400 py-12">
+            <div className="w-10 h-10 border-3 border-peerity-800 dark:border-teal-500 border-t-transparent rounded-full animate-spin" />
             <div className="text-center">
-              <p className="text-sm font-bold text-slate-800 font-display">Decrypting AES-256 Payload…</p>
-              <p className="text-xs text-slate-400 mt-0.5">Fetching from secure sidecar keystore</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">Decrypting AES-256 Payload…</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Fetching from secure storage</p>
             </div>
           </div>
         )}
 
         {/* Error state */}
         {!loading && error && (
-          <div className="flex flex-col items-center justify-center my-auto gap-3 text-slate-600 p-8 text-center max-w-md bg-white rounded-2xl border border-slate-300 shadow-sm">
-            <AlertCircle className="w-10 h-10 text-rose-500" />
-            <h3 className="text-base font-bold text-slate-900 font-display">Decryption Error</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{error}</p>
+          <div className="flex flex-col items-center justify-center my-auto gap-3 text-slate-600 dark:text-slate-300 p-8 text-center max-w-md bg-white dark:bg-slate-800 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-sm">
+            <AlertCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Decryption Error</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{error}</p>
             <button
               onClick={onDownload}
-              className="mt-2 flex items-center gap-1.5 px-4 py-2 bg-peerity-800 hover:bg-peerity-600 text-white rounded-lg text-xs font-semibold transition"
+              className="mt-2 flex items-center gap-1.5 px-4 py-2 bg-peerity-800 hover:bg-peerity-600 text-white rounded-lg text-xs font-semibold transition dark:bg-teal-600 dark:hover:bg-teal-500"
             >
               <Download className="w-3.5 h-3.5" /> Download Raw Artifact
             </button>
@@ -662,19 +662,19 @@ export const DocViewer: React.FC<DocViewerProps> = ({
         {/* 2. PDF: Single Page Mode */}
         {!loading && !error && isPdf && pdfDoc && viewMode === "single" && (
           <div className="my-auto flex flex-col items-center py-6">
-            <div className="bg-white rounded-lg shadow-lg border border-slate-300 overflow-hidden relative">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-300 dark:border-slate-600 overflow-hidden relative">
               <canvas ref={singleCanvasRef} className="block" />
               {singlePageRendering && (
-                <div className="absolute inset-0 bg-white/70 backdrop-blur-2xs flex items-center justify-center">
-                  <div className="w-8 h-8 border-3 border-peerity-800 border-t-transparent rounded-full animate-spin" />
+                <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xs flex items-center justify-center">
+                  <div className="w-8 h-8 border-3 border-peerity-800 dark:border-teal-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
             </div>
-            <div className="mt-3 flex items-center gap-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-300 text-xs font-mono text-slate-600 shadow-xs">
+            <div className="mt-3 flex items-center gap-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 text-xs font-mono text-slate-600 dark:text-slate-300 shadow-xs">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage <= 1}
-                className="hover:text-peerity-800 disabled:opacity-30"
+                className="hover:text-peerity-800 dark:hover:text-teal-400 disabled:opacity-30"
               >
                 &larr; Prev
               </button>
@@ -682,7 +682,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages}
-                className="hover:text-peerity-800 disabled:opacity-30"
+                className="hover:text-peerity-800 dark:hover:text-teal-400 disabled:opacity-30"
               >
                 Next &rarr;
               </button>
@@ -693,7 +693,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
         {/* 3. Code & Text File Preview Fallback */}
         {!loading && !error && textContent !== null && (
           <div className="w-full max-w-4xl bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden my-4 flex flex-col">
-            {/* Code Header Bar */}
+            {/* Code Header Bar — intentionally kept dark (terminal chrome) in both site themes */}
             <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950 border-b border-slate-800 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <Code2 className="w-4 h-4 text-emerald-400" />
@@ -740,7 +740,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
         {!loading && !error && imageUrl && (
           <div className="my-auto flex flex-col items-center py-6">
             <div
-              className="bg-white rounded-xl shadow-lg border border-slate-300 overflow-hidden p-2 transition-transform"
+              className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-300 dark:border-slate-600 overflow-hidden p-2 transition-transform"
               style={{ transform: `scale(${scale}) rotate(${rotation}deg)` }}
             >
               <img
@@ -754,22 +754,22 @@ export const DocViewer: React.FC<DocViewerProps> = ({
 
         {/* 5. Generic Non-previewable Binary */}
         {!loading && !error && !isPdf && textContent === null && !imageUrl && pdfBytes && (
-          <div className="my-auto flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-slate-300 shadow-md text-center max-w-md">
-            <div className="w-12 h-12 rounded-2xl bg-peerity-100 text-peerity-800 flex items-center justify-center mb-3">
+          <div className="my-auto flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-300 dark:border-slate-600 shadow-md text-center max-w-md">
+            <div className="w-12 h-12 rounded-2xl bg-peerity-100 text-peerity-800 dark:bg-teal-950/40 dark:text-teal-400 flex items-center justify-center mb-3">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-slate-900 font-display">Decrypted Binary Artifact</h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">Decrypted Binary Artifact</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               File type <code>.{fileExt || "bin"}</code> cannot be rendered directly in the canvas viewer.
             </p>
-            <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl w-full text-xs text-slate-600 font-mono flex justify-between">
+            <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl w-full text-xs text-slate-600 dark:text-slate-300 font-mono flex justify-between">
               <span>{fileName}</span>
               <span>{formattedFileSize}</span>
             </div>
             <button
               onClick={onDownload}
               disabled={isDownloading}
-              className="mt-4 flex items-center gap-1.5 px-5 py-2.5 bg-peerity-800 hover:bg-peerity-600 text-white rounded-xl text-xs font-semibold transition shadow-xs"
+              className="mt-4 flex items-center gap-1.5 px-5 py-2.5 bg-peerity-800 hover:bg-peerity-600 text-white rounded-xl text-xs font-semibold transition shadow-xs dark:bg-teal-600 dark:hover:bg-teal-500"
             >
               <Download className="w-4 h-4" /> {isDownloading ? "Decrypting..." : "Download Decrypted File"}
             </button>
@@ -778,10 +778,10 @@ export const DocViewer: React.FC<DocViewerProps> = ({
 
         {/* 6. Empty / Unloaded state */}
         {!loading && !error && !pdfBytes && (
-          <div className="my-auto flex flex-col items-center justify-center gap-2 text-slate-400 py-16">
+          <div className="my-auto flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 py-16">
             <BookOpen className="w-12 h-12 opacity-30" />
-            <p className="text-sm font-display font-medium text-slate-500">No submission loaded</p>
-            <p className="text-xs text-slate-400">Select a review from the roster to begin grading</p>
+            <p className="text-sm font-display font-medium text-slate-500 dark:text-slate-400">No submission loaded</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Select a review from the roster to begin grading</p>
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { userApi, type DataRequestPayload } from "../api/userApi";
+import { useAuth } from "../../context/AuthContext";
+import { userApi, type DataRequestPayload } from "../../api/userApi";
 import {
   Settings as SettingsIcon,
   Moon,
@@ -17,7 +17,9 @@ import {
   AlertCircle,
   Save,
 } from "lucide-react";
-import { ContentHeader, StatusPill } from "../components/ContentHeader";
+import { ContentHeader, StatusPill } from "../../components/ContentHeader";
+import { Button } from "../../components/ui";
+import { DataRequestModal } from "./DataRequestModal";
 
 const TIMEZONES = [
   { value: "UTC", label: "UTC (Coordinated Universal Time)" },
@@ -148,9 +150,12 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  // Handle data action request (export or deletion)
-  const handleSubmitDataRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle data action request. EXPORT files the formal request record (with the optional
+  // reason) and then immediately delivers the real data as a downloaded JSON file.
+  // DELETION stays request-only — it goes to an admin-reviewed queue, not instant deletion,
+  // since submissions/reviews/the audit trail have FK relationships that can't simply
+  // cascade-delete.
+  const handleSubmitDataRequest = async () => {
     setSubmittingDataRequest(true);
     try {
       const payload: DataRequestPayload = {
@@ -159,12 +164,26 @@ export const SettingsPage: React.FC = () => {
       };
       const res = await userApi.requestDataAction(payload);
       updateUserState(res.data);
+
+      if (requestAction === "EXPORT") {
+        const fileRes = await userApi.exportMyData();
+        const blob = new Blob([fileRes.data], { type: "application/json" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `peerity-data-export-${Date.now()}.json`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }
+
       setDataModalOpen(false);
       setRequestReason("");
       showToast(
-        `Formal administrative request for ${
-          requestAction === "EXPORT" ? "account data archive export" : "account deletion & decoupling"
-        } filed successfully.`,
+        requestAction === "EXPORT"
+          ? "Your data export has been downloaded."
+          : "Formal administrative request for account deletion & decoupling filed successfully.",
         "success"
       );
     } catch (err: any) {
@@ -362,22 +381,9 @@ export const SettingsPage: React.FC = () => {
 
             {/* Save Preferences Button */}
             <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={savingPreferences}
-                className="flex items-center gap-1.5 px-4 py-2 bg-peerity-800 hover:bg-peerity-700 dark:bg-teal-600 dark:hover:bg-teal-500 text-white rounded-lg text-sm font-semibold transition shadow-sm font-display disabled:opacity-50"
-              >
-                {savingPreferences ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" /> Save Preferences
-                  </>
-                )}
-              </button>
+              <Button type="submit" variant="primary" loading={savingPreferences} leftIcon={<Save className="w-4 h-4" />}>
+                {savingPreferences ? "Saving..." : "Save Preferences"}
+              </Button>
             </div>
           </form>
 
@@ -456,7 +462,7 @@ export const SettingsPage: React.FC = () => {
               >
                 <span className="flex items-center gap-2">
                   <Download className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                  Request Data Archive Export
+                  Export My Account Data
                 </span>
                 <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">JSON</span>
               </button>
@@ -484,7 +490,7 @@ export const SettingsPage: React.FC = () => {
               Privacy Architecture Note
             </h4>
             <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-              Peerity isolates all evaluations using double-blind pseudonyms and encrypted sidecars. Your personal identity is never accessible to peer reviewers during regular scoring.
+              Peerity isolates all evaluations using double-blind pseudonyms and in-process AES-256-GCM encryption. Your personal identity is never accessible to peer reviewers during regular scoring.
             </p>
             <a
               href="/privacy"
@@ -498,83 +504,14 @@ export const SettingsPage: React.FC = () => {
 
       {/* ── Modal for Data Export / Deletion Request ── */}
       {dataModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 shadow-xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  requestAction === "EXPORT"
-                    ? "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-teal-400"
-                    : "bg-rose-100 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300"
-                }`}
-              >
-                {requestAction === "EXPORT" ? (
-                  <Download className="w-5 h-5" />
-                ) : (
-                  <Trash2 className="w-5 h-5" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">
-                  {requestAction === "EXPORT"
-                    ? "Request Account Data Export"
-                    : "Request Account Deletion"}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Files an administrative ticket for campus processing
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {requestAction === "EXPORT"
-                ? "This will submit a formal administrative request to compile all your personal profile records, review transcripts, and appeal logs into an encrypted JSON export archive."
-                : "This files an administrative request to decouple and purge personal metadata. Note: Historical anonymous calibration data and cryptographically anchored ledger hashes are preserved to protect evaluation integrity."}
-            </p>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 font-display">
-                Reason or Notes (Optional)
-              </label>
-              <textarea
-                rows={3}
-                value={requestReason}
-                onChange={(e) => setRequestReason(e.target.value)}
-                placeholder="e.g. End of term transfer, privacy audit, personal backup..."
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setDataModalOpen(false)}
-                className="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={submittingDataRequest}
-                onClick={handleSubmitDataRequest}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white shadow-xs transition ${
-                  requestAction === "EXPORT"
-                    ? "bg-peerity-800 hover:bg-peerity-700 dark:bg-teal-600 dark:hover:bg-teal-500"
-                    : "bg-rose-600 hover:bg-rose-700"
-                }`}
-              >
-                {submittingDataRequest ? (
-                  <>
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Filing Request...
-                  </>
-                ) : (
-                  <>Submit Request</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <DataRequestModal
+          requestAction={requestAction}
+          requestReason={requestReason}
+          onReasonChange={setRequestReason}
+          submitting={submittingDataRequest}
+          onClose={() => setDataModalOpen(false)}
+          onSubmit={handleSubmitDataRequest}
+        />
       )}
     </div>
   );

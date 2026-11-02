@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, type PageResponse } from "./client";
 import { RubricCriterion } from "./assignmentApi";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -115,9 +115,9 @@ export const groupApi = {
   createGroup: (data: CreateGroupPayload) =>
     apiClient.post<Group>("/groups", data),
 
-  getAllGroups: (assignmentId?: string) =>
-    apiClient.get<Group[]>("/groups", {
-      params: assignmentId ? { assignmentId } : undefined,
+  getAllGroups: (assignmentId?: string, page = 0, size = 20) =>
+    apiClient.get<PageResponse<Group>>("/groups", {
+      params: { ...(assignmentId ? { assignmentId } : {}), page, size },
     }),
 
   // ── Group membership (all authenticated) ───────────────────────────────────
