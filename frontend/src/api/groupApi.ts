@@ -137,6 +137,11 @@ export const groupApi = {
   removeMember: (groupId: string, userId: string) =>
     apiClient.delete(`/groups/${groupId}/members/${userId}`),
 
+  deleteGroup: (groupId: string, force = false) =>
+    apiClient.delete<{ success: boolean; message: string }>(`/groups/${groupId}`, {
+      params: force ? { force: true } : undefined,
+    }),
+
   // ── Peer evaluation (student: submit + aggregate view) ─────────────────────
   submitEvaluation: (groupId: string, data: SubmitEvaluationPayload) =>
     apiClient.post(`/groups/${groupId}/evaluations`, data),

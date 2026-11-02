@@ -1,0 +1,30 @@
+{
+  "pdf1": {
+    "file": "01_Distributed_Systems_Raft_Consensus.pdf",
+    "status": "success",
+    "encryptedFileName": "fde3ac51-5e84-4653-abd7-025e0d06a28e.enc",
+    "fileHash": "1e5b9b9243c88dcb9fdcd8a402ba903dfac710c53f07f66d2b3e64435b24796b",
+    "fileSize": 4575
+  },
+  "pdf2": {
+    "file": "02_Web_Security_Cryptographic_Audit.pdf",
+    "status": "success",
+    "encryptedFileName": "e8046c29-b0b6-4d86-9bfd-ef6f37a6237f.enc",
+    "fileHash": "c74786bac41ab1e06b35889b5206e0b5c403fd7dd468f8f2d5d0711530f515c7",
+    "fileSize": 4577
+  },
+  "pdf3": {
+    "file": "05_FullStack_Web_Technologies_Architecture.pdf",
+    "status": "success",
+    "encryptedFileName": "fa730ac0-f91e-48e6-a920-c7bb4f04209b.enc",
+    "fileHash": "957b0bd240139aa2a5b49c5107e690d6cd83e9e548086faf7bda4eb7ef7f7141",
+    "fileSize": 4695
+  },
+  "pdf4": {
+    "file": "06_Applied_Cryptography_Key_Derivation.pdf",
+    "status": "success",
+    "encryptedFileName": "81c802b7-76bc-4077-a553-cb10f18086ac.enc",
+    "fileHash": "2fa28b960249673e3d28c19fc06e8dd450e4562114da5b260ef07530a3c58420",
+    "fileSize": 4695
+  }
+}

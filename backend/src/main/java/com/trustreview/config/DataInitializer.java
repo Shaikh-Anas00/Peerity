@@ -197,7 +197,7 @@ public class DataInitializer implements CommandLineRunner {
         addMembership(alpha, student2, MembershipRole.MEMBER, MembershipStatus.ACTIVE);
         if (student3 != null) addMembership(alpha, student3, MembershipRole.MEMBER, MembershipStatus.ACTIVE);
 
-        // Group Beta — 2 members + 1 pending (below feedback floor)
+        // Group Beta — 2 members + 1 pending (forming status)
         Group beta = new Group();
         beta.setName("Team Beta");
         beta.setDescription("Security audit team specialising in cryptographic implementation review.");
@@ -205,26 +205,64 @@ public class DataInitializer implements CommandLineRunner {
         if (assignments.size() > 1) beta.setAssignment(assignments.get(1));
         groupRepository.save(beta);
 
-        // Seed 2 evaluations for student1 (Alice) from student2 and student3 (2/3 received -> demonstrates k-anonymity withholding)
+        addMembership(beta, student2, MembershipRole.LEADER, MembershipStatus.ACTIVE);
+        if (student3 != null) addMembership(beta, student3, MembershipRole.MEMBER, MembershipStatus.ACTIVE);
+        if (student4 != null) addMembership(beta, student4, MembershipRole.MEMBER, MembershipStatus.PENDING);
+
+        // Group Gamma — Machine Learning & Differential Privacy (ACTIVE, 3 members)
+        Group gamma = new Group();
+        gamma.setName("Team Gamma");
+        gamma.setDescription("Machine Learning & Differential Privacy Research Group evaluating federated gradient protection.");
+        gamma.setStatus(GroupStatus.ACTIVE);
+        if (assignment != null) gamma.setAssignment(assignment);
+        groupRepository.save(gamma);
+
+        if (student3 != null) addMembership(gamma, student3, MembershipRole.LEADER, MembershipStatus.ACTIVE);
+        addMembership(gamma, student1, MembershipRole.MEMBER, MembershipStatus.ACTIVE);
+        if (student4 != null) addMembership(gamma, student4, MembershipRole.MEMBER, MembershipStatus.ACTIVE);
+
+        // Group Delta — Cloud Microservices & Distributed Architecture (FORMING, 3 members)
+        Group delta = new Group();
+        delta.setName("Team Delta");
+        delta.setDescription("Cloud Microservices & Distributed Architecture Working Group designing event-driven resilient backbones.");
+        delta.setStatus(GroupStatus.FORMING);
+        if (assignments.size() > 1) delta.setAssignment(assignments.get(1));
+        groupRepository.save(delta);
+
+        if (student4 != null) addMembership(delta, student4, MembershipRole.LEADER, MembershipStatus.ACTIVE);
+        addMembership(delta, student1, MembershipRole.MEMBER, MembershipStatus.PENDING);
+        addMembership(delta, student2, MembershipRole.MEMBER, MembershipStatus.PENDING);
+
+        // Seed rich evaluations for Team Alpha
         if (evaluationRepository.count() == 0 && student3 != null) {
             GroupMemberEvaluation eval1 = new GroupMemberEvaluation();
             eval1.setGroup(alpha);
             eval1.setEvaluator(student2);
             eval1.setEvaluatee(student1);
-            eval1.setScores("{\"Contribution\":8,\"Communication\":9,\"Reliability\":8,\"Teamwork\":9}");
-            eval1.setFeedback("Great coordination and architectural clarity on the Raft implementation.");
+            eval1.setScores("{\"Contribution\":9,\"Communication\":8,\"Reliability\":9,\"Teamwork\":9}");
+            eval1.setFeedback("Bob demonstrated exceptional mastery of the network partition testbed and consistently attended syncs.");
             evaluationRepository.save(eval1);
 
             GroupMemberEvaluation eval2 = new GroupMemberEvaluation();
             eval2.setGroup(alpha);
             eval2.setEvaluator(student3);
             eval2.setEvaluatee(student1);
-            eval2.setScores("{\"Contribution\":9,\"Communication\":8,\"Reliability\":9,\"Teamwork\":8}");
-            eval2.setFeedback("Consistently delivered thorough test cases on schedule.");
+            eval2.setScores("{\"Contribution\":8,\"Communication\":9,\"Reliability\":8,\"Teamwork\":9}");
+            eval2.setFeedback("Chloe provided insightful analysis on the Raft log compaction edge cases and documented all RPC payloads.");
             evaluationRepository.save(eval2);
+
+            if (student4 != null) {
+                GroupMemberEvaluation eval3 = new GroupMemberEvaluation();
+                eval3.setGroup(alpha);
+                eval3.setEvaluator(student4);
+                eval3.setEvaluatee(student1);
+                eval3.setScores("{\"Contribution\":10,\"Communication\":9,\"Reliability\":10,\"Teamwork\":9}");
+                eval3.setFeedback("Alice guided the team architecture seamlessly and kept code reviews punctual and constructive.");
+                evaluationRepository.save(eval3);
+            }
         }
 
-        logger.info("Seeded 2 demo groups (Team Alpha and Team Beta) with members and evaluations.");
+        logger.info("Seeded 4 demo groups (Team Alpha, Beta, Gamma, Delta) with members and evaluations.");
     }
 
     private void addMembership(Group group, User user, MembershipRole role, MembershipStatus status) {

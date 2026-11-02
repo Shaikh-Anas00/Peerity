@@ -109,6 +109,7 @@ public class SecurityConfig {
                 repo.setCookieName("XSRF-TOKEN");
                 repo.setHeaderName("X-XSRF-TOKEN");
                 CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+                requestHandler.setCsrfRequestAttributeName(null);
                 csrf
                     .csrfTokenRepository(repo)
                     .csrfTokenRequestHandler(requestHandler)

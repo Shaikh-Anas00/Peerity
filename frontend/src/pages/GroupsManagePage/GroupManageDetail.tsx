@@ -8,10 +8,12 @@ import {
   Eye,
   BarChart2,
   Layers,
+  Trash2,
+  Archive,
 } from "lucide-react";
 import { groupApi, Group, GroupMember, GroupMemberEvaluationAdmin } from "../../api/groupApi";
 import { ContentHeader, StatusPill } from "../../components/ContentHeader";
-import { Badge } from "../../components/ui";
+import { Badge, Button, Modal } from "../../components/ui";
 import { groupStatusTone } from "../GroupsPage/groupStatusTone";
 
 type ToastType = "success" | "error";
@@ -67,6 +69,30 @@ export const GroupManageDetail: React.FC<GroupManageDetailProps> = ({ group, onB
     } catch (err: any) { showToast(err.response?.data?.message || "Remove failed.", "error"); }
   };
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [hasConflict, setHasConflict] = useState(false);
+  const [conflictMsg, setConflictMsg] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteGroup = async (force = false) => {
+    setDeleting(true);
+    try {
+      const res = await groupApi.deleteGroup(group.id, force);
+      showToast(res.data.message || "Group deleted.", "success");
+      setDeleteConfirmOpen(false);
+      setTimeout(() => onBack(), 900);
+    } catch (err: any) {
+      if (err.response?.status === 409) {
+        setHasConflict(true);
+        setConflictMsg(err.response?.data?.message || "Cannot delete group with existing student evaluations.");
+      } else {
+        showToast(err.response?.data?.message || "Delete operation failed.", "error");
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const tabCls = (t: typeof tab) =>
     `px-4 py-2 text-sm font-semibold border-b-2 transition font-display ${
       tab === t
@@ -115,6 +141,17 @@ export const GroupManageDetail: React.FC<GroupManageDetailProps> = ({ group, onB
             label={`${group.status} GROUP`}
             variant={group.status === "ACTIVE" ? "success" : group.status === "FORMING" ? "warning" : "neutral"}
           />
+        }
+        actions={
+          <button
+            type="button"
+            onClick={() => { setDeleteConfirmOpen(true); setHasConflict(false); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg transition font-display shadow-xs cursor-pointer"
+            title="Delete or Archive Group"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Delete Group
+          </button>
         }
       />
 
@@ -229,6 +266,72 @@ export const GroupManageDetail: React.FC<GroupManageDetailProps> = ({ group, onB
           )}
         </div>
       </div>
+
+      <Modal
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        title="Delete Study Group"
+        maxWidth="md"
+      >
+        {hasConflict ? (
+          <div className="space-y-3">
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-semibold text-xs font-display">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <span>Academic Guard Triggered</span>
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-300 font-body leading-relaxed">
+                {conflictMsg}
+              </p>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-body">
+              To protect academic records and prevent grade loss, this group cannot be permanently erased. Would you like to <strong>Archive &amp; Close</strong> this group instead? It will be hidden from active student rosters while keeping historical evaluations safe.
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setDeleteConfirmOpen(false)}>
+                Cancel
+              </Button>
+              <button
+                type="button"
+                onClick={() => handleDeleteGroup(true)}
+                disabled={deleting}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-lg transition shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                <Archive className="w-3.5 h-3.5" />
+                {deleting ? "Archiving..." : "Archive & Close Group"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-body leading-relaxed">
+              Are you sure you want to delete <strong>"{group.name}"</strong>?
+            </p>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400 font-body space-y-1">
+              <p className="font-semibold text-slate-700 dark:text-slate-300">Academic Policy Guard:</p>
+              <ul className="list-disc list-inside space-y-0.5">
+                <li>If 0 evaluations exist, the group is permanently purged.</li>
+                <li>If student evaluations exist, you will be prompted to safely archive it.</li>
+              </ul>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setDeleteConfirmOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                loading={deleting}
+                onClick={() => handleDeleteGroup(false)}
+              >
+                {deleting ? "Checking & Deleting..." : "Delete Group"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium flex items-center gap-2 ${
