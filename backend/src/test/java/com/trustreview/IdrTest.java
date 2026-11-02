@@ -6,7 +6,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -96,7 +97,7 @@ class IdrTest {
     // ── Test 1: Student A cannot download Student B's file ───────────────────
 
     @Test
-    @WithMockUser(username = "idor_studentA@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "idor_studentA@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Student A cannot download Student B's submission file (not author, not assigned reviewer here)")
     void studentA_cannotDownload_studentB_submission_asNonReviewer() throws Exception {
         // Create a second submission for Student B on a different assignment
@@ -133,7 +134,7 @@ class IdrTest {
     // ── Test 2: Student A's /my-submissions only contains their own ──────────
 
     @Test
-    @WithMockUser(username = "idor_studentA@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "idor_studentA@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("GET /api/submissions/my only returns Student A's own submissions")
     void mySubmissions_onlyOwnData() throws Exception {
         mockMvc.perform(get("/api/submissions/my"))
@@ -149,7 +150,7 @@ class IdrTest {
     // ── Test 3: Student A's /my-appeals only contains their own ─────────────
 
     @Test
-    @WithMockUser(username = "idor_studentA@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "idor_studentA@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("GET /api/appeals/my-appeals only returns Student A's own appeals")
     void myAppeals_onlyOwnData() throws Exception {
         mockMvc.perform(get("/api/appeals/my-appeals"))
@@ -166,7 +167,7 @@ class IdrTest {
     // ── Test 4: Student cannot submit a review that is not assigned to them ──
 
     @Test
-    @WithMockUser(username = "idor_studentB@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "idor_studentB@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Student B cannot submit a review assigned to Student A")
     void studentB_cannotSubmit_reviewAssignedToStudentA() throws Exception {
         // reviewForBId is assigned to Student A, not Student B

@@ -4,7 +4,7 @@ import com.trustreview.dto.ApiResponse;
 import com.trustreview.dto.ReviewDto;
 import com.trustreview.dto.SubmitReviewRequest;
 import com.trustreview.model.User;
-import com.trustreview.repository.UserRepository;
+import com.trustreview.security.PeerityUserDetails;
 import com.trustreview.service.ReviewService;
 import com.trustreview.service.ReviewRatingService;
 import com.trustreview.dto.SubmitReviewRatingRequest;
@@ -15,7 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,16 +26,13 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final ReviewRatingService reviewRatingService;
-    private final UserRepository userRepository;
     private final ClientIpResolver clientIpResolver;
 
     public ReviewController(ReviewService reviewService,
                             ReviewRatingService reviewRatingService,
-                            UserRepository userRepository,
                             ClientIpResolver clientIpResolver) {
         this.reviewService = reviewService;
         this.reviewRatingService = reviewRatingService;
-        this.userRepository = userRepository;
         this.clientIpResolver = clientIpResolver;
     }
 
@@ -45,8 +42,8 @@ public class ReviewController {
      */
     @GetMapping("/assigned-to-me")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<ReviewDto>> assignedToMe(Authentication auth) {
-        User reviewer = resolveUser(auth);
+    public ResponseEntity<List<ReviewDto>> assignedToMe(@AuthenticationPrincipal PeerityUserDetails principal) {
+        User reviewer = principal.getUser();
         return ResponseEntity.ok(reviewService.getAssignedToMe(reviewer));
     }
 
@@ -58,9 +55,9 @@ public class ReviewController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> submitReview(@PathVariable String id,
                                           @Valid @RequestBody SubmitReviewRequest req,
-                                          Authentication auth) {
+                                          @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
-            User reviewer = resolveUser(auth);
+            User reviewer = principal.getUser();
             ReviewDto dto = reviewService.submitReview(id, req, reviewer);
             return ResponseEntity.ok(dto);
         } catch (SecurityException ex) {
@@ -76,8 +73,8 @@ public class ReviewController {
      */
     @GetMapping("/my-feedback")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<ReviewDto>> myFeedback(Authentication auth) {
-        User author = resolveUser(auth);
+    public ResponseEntity<List<ReviewDto>> myFeedback(@AuthenticationPrincipal PeerityUserDetails principal) {
+        User author = principal.getUser();
         return ResponseEntity.ok(reviewService.getMyFeedback(author));
     }
 
@@ -88,20 +85,12 @@ public class ReviewController {
     public ResponseEntity<?> rateReview(
             @PathVariable String id,
             @Valid @RequestBody SubmitReviewRatingRequest req,
-            Authentication auth,
+            @AuthenticationPrincipal PeerityUserDetails principal,
             HttpServletRequest httpRequest) {
-        try {
-            User author = resolveUser(auth);
-            String clientIp = clientIpResolver.resolveClientIp(httpRequest);
-            ReviewRatingDto dto = reviewRatingService.rateReview(id, req, author, clientIp);
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-        } catch (IllegalStateException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, ex.getMessage()));
-        } catch (SecurityException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, ex.getMessage()));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, ex.getMessage()));
-        }
+        User author = principal.getUser();
+        String clientIp = clientIpResolver.resolveClientIp(httpRequest);
+        ReviewRatingDto dto = reviewRatingService.rateReview(id, req, author, clientIp);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     /** GET /api/reviews/{id}/rating — Authenticated */
@@ -111,10 +100,5 @@ public class ReviewController {
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ApiResponse(false, "No rating found for review: " + id)));
-    }
-
-    private User resolveUser(Authentication auth) {
-        return userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
     }
 }

@@ -79,12 +79,23 @@ public class ReviewService {
 
         int reviewsCreated = 0;
 
+        // Fetch every existing review for this assignment's submissions ONCE, instead of
+        // querying existsByReviewerAndSubmission() per (reviewer, submission) candidate pair
+        // inside the loop below — that was an O(n^2) query pattern (one query per candidate,
+        // per submission). Re-checked here against a fresh read, not against anything created
+        // later in this same call: each submission's candidate list can only contain one entry
+        // per other submission's author, so no reviewer can be picked twice for the same
+        // submission within a single distribute() run regardless of this set's contents.
+        Set<String> alreadyAssignedPairs = reviewRepository.findBySubmissionIn(submissions).stream()
+                .map(r -> r.getReviewer().getId() + "::" + r.getSubmission().getId())
+                .collect(Collectors.toSet());
+
         for (Submission submission : submissions) {
             // Remove the author from the eligible reviewer pool
             List<User> eligibleReviewers = submissions.stream()
                     .map(Submission::getAuthor)
                     .filter(u -> !u.getId().equals(submission.getAuthor().getId()))
-                    .filter(u -> !reviewRepository.existsByReviewerAndSubmission(u, submission))
+                    .filter(u -> !alreadyAssignedPairs.contains(u.getId() + "::" + submission.getId()))
                     .collect(Collectors.toList());
 
             // Shuffle for randomness

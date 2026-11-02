@@ -58,50 +58,41 @@ Never hard-code `true` — the default must remain `false` so the app still work
 
 ---
 
-## Item 3 — X-Internal-Service-Key (PHP Sidecar Auth)
+## Item 3 — X-Internal-Service-Key (PHP Sidecar Auth) — REMOVED
 
-### Current Config
-- Spring side (`application.properties`): `trustreview.internal.service-key=${INTERNAL_SERVICE_KEY:TrustReview-Internal-Secret-Key-Phase3-Secure}`
-- PHP side (`index.php`): `getenv('INTERNAL_SERVICE_KEY') ?: 'TrustReview-Internal-Secret-Key-Phase3-Secure'`
-
-### Status: SAFE FOR LOCAL DEV / ACTION REQUIRED FOR PRODUCTION
-
-**Why the fallback default is risky in production**: The fallback literal `TrustReview-Internal-Secret-Key-Phase3-Secure`
-is in your public git repository. Anyone who clones your repo and forgets to set the env var
-will expose this key.
-
-**Production action**: Generate a random secret and set it as an environment variable on both
-the Spring Boot host and the PHP sidecar host:
-```powershell
-# Generate a 256-bit random key
-[System.Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
-```
-Set it in `.env` (never commit this file) or in your hosting platform's secret manager:
-```
-INTERNAL_SERVICE_KEY=<random-base64-string>
-```
-Both services read from the environment — the fallback is only a safety net for initial dev setup.
+**Status: OBSOLETE.** The PHP crypto sidecar was retired and its logic folded directly into
+the Spring Boot backend (`FileCryptoService`, in-process AES-256-GCM via `javax.crypto`).
+There is no longer a second process, so there is no service-to-service boundary to
+authenticate across, and `INTERNAL_SERVICE_KEY`/`trustreview.internal.service-key` no longer
+exist anywhere in the codebase. This item is kept here only as a historical record of a
+decision that no longer applies — see Item 4 for the encryption key that replaced it.
 
 ---
 
-## Item 4 — AES Encryption Key (PHP APP_KEY)
+## Item 4 — AES Encryption Key (APP_KEY)
 
-### Current Config (index.php)
-```php
-function getEncryptionKey(): string {
-    $rawKey = getenv('APP_KEY') ?: 'TrustReview-AES-256-Secret-Master-Key-2026';
-    return hash('sha256', $rawKey, true); // 32 bytes binary
+### Current Config (`application.properties` / `FileCryptoService`)
+```properties
+trustreview.crypto.app-key=${APP_KEY:TrustReview-AES-256-Secret-Master-Key-2026}
+```
+```java
+private SecretKeySpec aesKey() {
+    byte[] keyBytes = MessageDigest.getInstance("SHA-256").digest(appKey.getBytes(StandardCharsets.UTF_8));
+    return new SecretKeySpec(keyBytes, "AES"); // 32 bytes
 }
 ```
 
 ### Status: ACCEPTABLE FOR DEV / ACTION REQUIRED BEFORE ANY REAL DATA
 
 **The current design is correct**: The raw `APP_KEY` string is SHA-256-hashed to produce a
-32-byte AES key. This is better than truncating or padding.
+32-byte AES key — unchanged from the former PHP sidecar's approach (same hash, same fallback
+literal), so any file encrypted before the sidecar was retired remains decryptable.
 
 **The problem**: The fallback `TrustReview-AES-256-Secret-Master-Key-2026` is committed to git.
 If a file is encrypted with the default key and the key later changes, all existing encrypted
-files become permanently unreadable (no key rotation mechanism exists yet).
+files become permanently unreadable (no key rotation mechanism exists yet). The backend now
+refuses to start under `SPRING_PROFILES_ACTIVE=prod` if `APP_KEY` is still this default (see
+`ProductionSecretsGuard`).
 
 **Production action**: Set a strong random `APP_KEY` before encrypting any real submission:
 ```
@@ -128,20 +119,11 @@ production. Losing or changing this secret invalidates the entire audit chain ve
 
 ---
 
-## Item 6 — PHP Sidecar Network Binding
+## Item 6 — PHP Sidecar Network Binding — REMOVED
 
-### Current Config (php-service/run.bat)
-```bat
-php -S 127.0.0.1:8000 -t src
-```
-
-### Status: CORRECT AND SECURE
-
-The PHP sidecar is bound to `127.0.0.1` (loopback only). It is NOT accessible from the local
-network, Wi-Fi, or the internet. This is confirmed at both the OS level (bind address) and the
-application level (loopback IP check in `index.php`).
-
-No action required.
+**Status: OBSOLETE.** There is no longer a PHP sidecar process or a loopback network boundary
+to secure — encryption happens in-process inside the Spring Boot backend. Kept as a
+historical record only.
 
 ---
 
@@ -192,23 +174,32 @@ No action required for the current submission.
 
 ---
 
-## Item 9 — spring.jpa.hibernate.ddl-auto=update
+## Item 9 — spring.jpa.hibernate.ddl-auto=update — RESOLVED
 
-### Current Config
+### Former Config
 ```properties
 spring.jpa.hibernate.ddl-auto=update
 ```
 
-### Status: ACCEPTABLE FOR DEV / RISKY IN PRODUCTION
+### Status: RESOLVED — Flyway now owns schema versioning
 
-`update` tells Hibernate to auto-migrate the schema on startup. This is convenient for
-development but can corrupt a production database if a migration goes wrong.
+`update` told Hibernate to auto-migrate the schema on startup, which is convenient in
+development but can corrupt a production database if an inferred migration goes wrong, and
+leaves no versioned history of what the schema actually is.
 
-**For the current project submission**: Keep `update`. It ensures the schema stays in sync
-with entity changes without manual SQL scripts.
-
-**Future Work**: Switch to `validate` (or `none`) in production and use Flyway or Liquibase
-for versioned database migrations.
+**Fix applied**: `ddl-auto` is now `validate` in every profile (dev and prod), and Flyway
+(`org.flywaydb:flyway-core` + `flyway-mysql`) owns schema creation via
+`backend/src/main/resources/db/migration/V1__baseline.sql` — a baseline captured from the
+exact schema Hibernate had been managing. `spring.flyway.baseline-on-migrate=true` lets
+Flyway adopt the existing, already-`ddl-auto=update`-managed database as if `V1` had already
+been applied, rather than re-running `CREATE TABLE` against tables that already exist. All
+future schema changes go through a new `V{n}__*.sql` file — Hibernate no longer infers schema
+changes at runtime in any profile. The H2 test profile is unaffected (`spring.flyway.enabled=
+false` there — Flyway's MySQL-dialect SQL isn't valid against H2, so tests keep generating
+their schema straight from the JPA entities via `ddl-auto=create-drop`, exactly as before).
+Verified end-to-end: a fresh database migrates cleanly and passes Hibernate's `validate` check
+with zero mismatches, and baselining a pre-existing (already-seeded) database adopts it
+without attempting to re-create any table.
 
 ---
 
@@ -218,10 +209,10 @@ for versioned database migrations.
 |---|---|---|---|
 | 1 | CORS | Safe (localhost only) | Set `CLIENT_URL` to exact domain; remove localhost patterns |
 | 2 | Cookie `Secure` flag | Correct (`false`) | Set `SPRING_COOKIE_SECURE=true` behind HTTPS |
-| 3 | X-Internal-Service-Key | Fallback in git (acceptable) | Generate random key, set env var on both services |
+| 3 | X-Internal-Service-Key | REMOVED (PHP sidecar retired) | — |
 | 4 | AES APP_KEY | Fallback in git (acceptable for demo) | Set random key before any real data; never change after |
 | 5 | HMAC Secret | Fallback in git (acceptable) | Set `AUDIT_LEDGER_HMAC_SECRET` env var in production |
-| 6 | PHP loopback binding | CORRECT (127.0.0.1) | No action needed |
+| 6 | PHP loopback binding | REMOVED (PHP sidecar retired) | — |
 | 7 | Rate limiting | Functional (in-memory) | Redis-backed rate limiter for production cluster |
 | 8 | Seed accounts | Gated by @Profile("dev") | Set `SPRING_PROFILES_ACTIVE=prod` in production |
-| 9 | DDL auto=update | Acceptable for dev | Switch to Flyway/Liquibase for production |
+| 9 | DDL auto=update | REMOVED (Flyway-managed schema) | — |

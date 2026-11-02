@@ -9,7 +9,9 @@ import com.trustreview.repository.UserRepository;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,7 +37,12 @@ class AuthorizationMatrixTest {
 
     @org.junit.jupiter.api.BeforeEach
     void seedMockUsers() {
-        // @WithMockUser creates virtual principal "user"; seed it so resolveUser() finds it.
+        // Tests that only check a @PreAuthorize role gate (expect 403/401, never reach the
+        // controller body) use @WithMockUser, whose authorities come straight from the
+        // annotation. Tests whose controller body now reads @AuthenticationPrincipal
+        // PeerityUserDetails (reads the real User entity) use @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        // instead, which round-trips through the real CustomUserDetailsService — hence "user"
+        // must exist in the DB.
         seedIfAbsent("user", Role.STUDENT);
         seedIfAbsent("student1@trustreview.edu", Role.STUDENT);
         seedIfAbsent("committee1@trustreview.edu", Role.COMMITTEE);
@@ -177,7 +184,7 @@ class AuthorizationMatrixTest {
         mockMvc.perform(get("/api/reviews/assigned-to-me")).andExpect(status().isForbidden());
     }
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT → GET /api/reviews/assigned-to-me → 200")
     void assignedToMe_student_200() throws Exception {
         mockMvc.perform(get("/api/reviews/assigned-to-me")).andExpect(status().isOk());
@@ -191,7 +198,7 @@ class AuthorizationMatrixTest {
 
     // ── /api/reviews/my-feedback ─────────────────────────────────────────────
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT → GET /api/reviews/my-feedback → 200")
     void myFeedback_student_200() throws Exception {
         mockMvc.perform(get("/api/reviews/my-feedback")).andExpect(status().isOk());
@@ -211,7 +218,7 @@ class AuthorizationMatrixTest {
 
     // ── /api/appeals/my-appeals ──────────────────────────────────────────────
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT → GET /api/appeals/my-appeals → 200")
     void myAppeals_student_200() throws Exception {
         mockMvc.perform(get("/api/appeals/my-appeals")).andExpect(status().isOk());
@@ -259,7 +266,7 @@ class AuthorizationMatrixTest {
 
     // ── /api/submissions/my ──────────────────────────────────────────────────
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT → GET /api/submissions/my → 200")
     void mySubmissions_student_200() throws Exception {
         mockMvc.perform(get("/api/submissions/my")).andExpect(status().isOk());
@@ -311,7 +318,7 @@ class AuthorizationMatrixTest {
 
     // ── Security Headers ──────────────────────────────────────────────────────
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Response includes X-Content-Type-Options: nosniff")
     void securityHeaders_xContentTypeOptions() throws Exception {
         mockMvc.perform(get("/api/appeals/my-appeals"))
@@ -322,7 +329,7 @@ class AuthorizationMatrixTest {
             });
     }
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Response includes X-Frame-Options: DENY")
     void securityHeaders_xFrameOptions() throws Exception {
         mockMvc.perform(get("/api/appeals/my-appeals"))
@@ -333,7 +340,7 @@ class AuthorizationMatrixTest {
             });
     }
 
-    @Test @WithMockUser(roles = "STUDENT")
+    @Test @WithUserDetails(value = "user", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Response includes Content-Security-Policy header")
     void securityHeaders_csp() throws Exception {
         mockMvc.perform(get("/api/appeals/my-appeals"))

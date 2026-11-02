@@ -20,17 +20,7 @@ export interface Submission {
   authorDepartment?: string;
 }
 
-export interface CreateSubmissionPayload {
-  assignmentId: string;
-  originalFileName: string;
-  fileSize?: string;
-  fileType?: string;
-}
-
 export const submissionApi = {
-  create: (data: CreateSubmissionPayload) =>
-    apiClient.post<Submission>("/submissions", data),
-
   createWithFile: (
     assignmentId: string,
     file: File,

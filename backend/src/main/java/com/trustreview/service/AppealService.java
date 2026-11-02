@@ -3,7 +3,6 @@ package com.trustreview.service;
 import com.trustreview.dto.AppealDto;
 import com.trustreview.dto.CreateAppealRequest;
 import com.trustreview.dto.DisclosedIdentityDto;
-import com.trustreview.dto.ResolveAppealRequest;
 import com.trustreview.model.*;
 import com.trustreview.repository.AppealRepository;
 import com.trustreview.repository.ReviewRepository;
@@ -14,10 +13,11 @@ import com.trustreview.model.ReviewRating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -184,11 +184,9 @@ public class AppealService {
      * Returns all open appeals for Committee, Admin, or Instructor review.
      */
     @Transactional(readOnly = true)
-    public List<AppealDto> getPendingAppeals() {
-        return appealRepository.findOpenAppeals()
-                .stream()
-                .map(a -> enrichAppealDto(a, null))
-                .collect(Collectors.toList());
+    public Page<AppealDto> getPendingAppeals(int page, int size) {
+        return appealRepository.findOpenAppeals(PageRequest.of(page, size))
+                .map(a -> enrichAppealDto(a, null));
     }
 
     /**
@@ -245,32 +243,6 @@ public class AppealService {
         );
     }
 
-    /**
-     * Committee / Admin resolves an appeal and approves or rejects progressive disclosure.
-     */
-    @Transactional
-    public AppealDto resolveAppeal(String appealId, ResolveAppealRequest req, User resolver) {
-        Appeal appeal = appealRepository.findById(appealId)
-                .orElseThrow(() -> new IllegalArgumentException("Appeal not found: " + appealId));
-
-        if (appeal.getDisclosureRequest() != null && appeal.getDisclosureRequest().getStatus() == DisclosureStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Appeal cannot be manually resolved while quorum voting is still open.");
-        }
-
-        appeal.setStatus(req.getStatus());
-        appeal.setResolvedAt(LocalDateTime.now());
-        appeal.setResolution(req.getResolutionNote());
-
-        if (appeal.getDisclosureRequest() != null) {
-            appeal.getDisclosureRequest().setStatus(
-                    req.isApproveDisclosure() ? DisclosureStatus.APPROVED : DisclosureStatus.REJECTED
-            );
-        }
-
-        Appeal saved = appealRepository.save(appeal);
-        logger.info("Resolved appeal id={} with status={}, disclosureApproved={}",
-                saved.getId(), req.getStatus(), req.isApproveDisclosure());
-
-        return AppealDto.from(saved);
-    }
+    // Disclosure resolution now happens exclusively through QuorumService.castVote().
+    // The former single-admin resolveAppeal() override has been removed (see P0.2).
 }

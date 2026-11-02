@@ -3,7 +3,7 @@ package com.trustreview.controller;
 import com.trustreview.dto.ApiResponse;
 import com.trustreview.dto.SubmissionDto;
 import com.trustreview.model.User;
-import com.trustreview.repository.UserRepository;
+import com.trustreview.security.PeerityUserDetails;
 import com.trustreview.service.AssignmentService;
 import com.trustreview.service.ReviewService;
 import com.trustreview.service.SubmissionService;
@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,31 +30,28 @@ public class SubmissionController {
     private final SubmissionService submissionService;
     private final AssignmentService assignmentService;
     private final ReviewService reviewService;
-    private final UserRepository userRepository;
 
     public SubmissionController(SubmissionService submissionService,
                                 AssignmentService assignmentService,
-                                ReviewService reviewService,
-                                UserRepository userRepository) {
+                                ReviewService reviewService) {
         this.submissionService = submissionService;
         this.assignmentService = assignmentService;
         this.reviewService = reviewService;
-        this.userRepository = userRepository;
     }
 
     /**
      * POST /api/submissions -- STUDENT only
      * Accepts multipart/form-data containing assignmentId and file.
-     * Forwards payload to PHP sidecar for AES-256-GCM encryption.
+     * Encrypts the file in-process with AES-256-GCM before persisting it.
      */
     @PostMapping(value = "/submissions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> submitWithFile(
             @RequestParam("assignmentId") String assignmentId,
             @RequestParam("file") MultipartFile file,
-            Authentication auth) {
+            @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
-            User author = resolveUser(auth);
+            User author = principal.getUser();
             SubmissionDto dto = submissionService.createWithFile(assignmentId, file, author);
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         } catch (IllegalArgumentException ex) {
@@ -72,9 +69,9 @@ public class SubmissionController {
      * Enforces RBAC: author, assigned reviewer, or instructor/admin.
      */
     @GetMapping("/submissions/{id}/file")
-    public ResponseEntity<?> downloadFile(@PathVariable String id, Authentication auth) {
+    public ResponseEntity<?> downloadFile(@PathVariable String id, @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
-            User user = resolveUser(auth);
+            User user = principal.getUser();
             SubmissionService.DecryptedFilePayload payload = submissionService.getSubmissionFile(id, user);
 
             String contentType = payload.fileType() != null && !payload.fileType().isBlank()
@@ -103,8 +100,8 @@ public class SubmissionController {
     /** GET /api/submissions/my -- STUDENT's own submissions */
     @GetMapping("/submissions/my")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<SubmissionDto>> mySubmissions(Authentication auth) {
-        User user = resolveUser(auth);
+    public ResponseEntity<List<SubmissionDto>> mySubmissions(@AuthenticationPrincipal PeerityUserDetails principal) {
+        User user = principal.getUser();
         return ResponseEntity.ok(submissionService.findMySubmissions(user));
     }
 
@@ -117,20 +114,15 @@ public class SubmissionController {
     public ResponseEntity<?> distribute(
             @PathVariable String id,
             @RequestBody(required = false) Map<String, Integer> body,
-            Authentication auth) {
+            @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
             int count = (body != null && body.containsKey("reviewerCount"))
                     ? body.get("reviewerCount") : 2;
-            User requestor = resolveUser(auth);
+            User requestor = principal.getUser();
             Map<String, Object> result = reviewService.distribute(id, count, requestor);
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, ex.getMessage()));
         }
-    }
-
-    private User resolveUser(Authentication auth) {
-        return userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
     }
 }

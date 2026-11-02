@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,7 +99,7 @@ class DisclosedIdentityIdrTest {
     // ── Student A (the actual author) can query their own review ─────────────
 
     @Test
-    @WithMockUser(username = "studentA_idor@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "studentA_idor@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Student A (author) → GET disclosed-identity → 200 (anonymous by default, no disclosure approved)")
     void studentA_author_canQueryOwnReview_200() throws Exception {
         mockMvc.perform(get("/api/reviews/{id}/disclosed-identity", reviewId))
@@ -112,7 +113,7 @@ class DisclosedIdentityIdrTest {
     // ── Student B (unrelated) must be blocked ───────────────────────────────
 
     @Test
-    @WithMockUser(username = "studentB_idor@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "studentB_idor@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Student B (unrelated) → GET disclosed-identity → 403 Forbidden")
     void studentB_unrelated_cannotQuery_403() throws Exception {
         // This is the core IDOR test: Student B guesses/discovers the review ID
@@ -133,7 +134,7 @@ class DisclosedIdentityIdrTest {
     // ── Staff can access (service-layer allows COMMITTEE/ADMIN/INSTRUCTOR) ──
 
     @Test
-    @WithMockUser(username = "committee1@trustreview.edu", roles = "COMMITTEE")
+    @WithUserDetails(value = "committee1@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("COMMITTEE → GET disclosed-identity → 200 (anonymous without quorum approval)")
     void committee_canQuery_200_anonymousByDefault() throws Exception {
         // COMMITTEE is allowed to call this — they need it for adjudication context.
@@ -147,7 +148,7 @@ class DisclosedIdentityIdrTest {
     // ── Non-existent review ID returns 404, not 403 ─────────────────────────
 
     @Test
-    @WithMockUser(username = "studentA_idor@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "studentA_idor@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("Non-existent review ID → 404 (not a silent 200 or 403 that leaks existence)")
     void nonExistentReview_404() throws Exception {
         mockMvc.perform(get("/api/reviews/{id}/disclosed-identity", "00000000-0000-0000-0000-000000000000"))

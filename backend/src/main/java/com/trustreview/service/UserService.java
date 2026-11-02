@@ -1,6 +1,7 @@
 package com.trustreview.service;
 
 import com.trustreview.dto.RegisterRequest;
+import com.trustreview.dto.UserDataExportDto;
 import com.trustreview.dto.UserDto;
 import com.trustreview.model.AuditLog;
 import com.trustreview.model.Role;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -19,13 +21,22 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuditLedgerService auditLedgerService;
     private final PasswordEncoder passwordEncoder;
+    private final SubmissionService submissionService;
+    private final ReviewService reviewService;
+    private final AppealService appealService;
 
     public UserService(UserRepository userRepository,
                        AuditLedgerService auditLedgerService,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       SubmissionService submissionService,
+                       ReviewService reviewService,
+                       AppealService appealService) {
         this.userRepository = userRepository;
         this.auditLedgerService = auditLedgerService;
         this.passwordEncoder = passwordEncoder;
+        this.submissionService = submissionService;
+        this.reviewService = reviewService;
+        this.appealService = appealService;
     }
 
     @Transactional
@@ -231,6 +242,42 @@ public class UserService {
 
         User saved = userRepository.save(user);
         return new UserDto(saved);
+    }
+
+    /**
+     * Real-time GDPR data export (Art. 15/20) — bundles the requesting user's own profile,
+     * submissions, reviews given, feedback received, and filed appeals into one downloadable
+     * payload. Every list is sourced from the same "my"-scoped service methods the
+     * authenticated UI already calls, so this can only ever return the caller's own data.
+     *
+     * Deliberately independent of {@link #requestDataAction}'s EXPORT_REQUESTED flag — that
+     * flow still exists as a formal record of intent, this is the actual, immediate delivery
+     * of the data behind it.
+     */
+    @Transactional(readOnly = true)
+    public UserDataExportDto exportMyData(String userEmail, String ipAddress) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userEmail));
+
+        UserDataExportDto export = new UserDataExportDto(
+                new UserDto(user),
+                submissionService.findMySubmissions(user),
+                reviewService.getAssignedToMe(user),
+                reviewService.getMyFeedback(user),
+                appealService.getMyAppeals(user),
+                Instant.now()
+        );
+
+        auditLedgerService.logEvent(
+                "DATA_EXPORT_DOWNLOADED",
+                user.getEmail(),
+                "User",
+                user.getId(),
+                "User downloaded their full account data export (profile, submissions, reviews, appeals).",
+                ipAddress
+        );
+
+        return export;
     }
 
     public Optional<UserDto> findByEmail(String email) {

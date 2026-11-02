@@ -49,28 +49,24 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request,
                                      HttpServletRequest httpRequest) {
-        try {
-            String clientIp = getClientIp(httpRequest);
-            UserDto registeredUser = userService.register(request, clientIp);
+        String clientIp = getClientIp(httpRequest);
+        UserDto registeredUser = userService.register(request, clientIp);
 
-            // Auto-login newly registered user
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail().trim().toLowerCase(), request.getPassword())
-            );
+        // Auto-login newly registered user
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getEmail().trim().toLowerCase(), request.getPassword())
+        );
 
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(authentication);
-            SecurityContextHolder.setContext(context);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
 
-            HttpSession session = httpRequest.getSession(true);
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
-            session.setAttribute("userId", registeredUser.getId());
-            session.setAttribute("role", registeredUser.getRole());
+        HttpSession session = httpRequest.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+        session.setAttribute("userId", registeredUser.getId());
+        session.setAttribute("role", registeredUser.getRole());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(false, ex.getMessage()));
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 
     @PostMapping("/login")

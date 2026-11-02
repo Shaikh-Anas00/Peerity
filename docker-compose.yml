@@ -1,0 +1,53 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: trustreview_root_dev_pw
+      MYSQL_DATABASE: trustreview_db
+      MYSQL_USER: trustreview
+      MYSQL_PASSWORD: trustreview_dev_pw
+    ports:
+      # Host 3307, not 3306 — avoids colliding with a local MySQL install (e.g. XAMPP).
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-ptrustreview_root_dev_pw"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # dev profile: seeds demo accounts (student1@peerity.edu, etc.) via DataInitializer
+      # and skips ProductionSecretsGuard's committed-default check — this stack is for
+      # local evaluation, not a real deployment. See docs/CONFIG_SECURITY_ANALYSIS.md
+      # and the README's Production Deployment section before using SPRING_PROFILES_ACTIVE=prod.
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: trustreview_db
+      DB_USER: trustreview
+      DB_PASSWORD: trustreview_dev_pw
+      CLIENT_URL: "http://localhost:8080"
+    ports:
+      # Host 8081, not 5000 — avoids colliding with a locally-running dev server.
+      - "8081:5000"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      # Host 8080, not 5173 — avoids colliding with a locally-running Vite dev server.
+      - "8080:80"
+
+volumes:
+  mysql_data:

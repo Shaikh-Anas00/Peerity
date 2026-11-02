@@ -7,6 +7,9 @@ import com.trustreview.model.*;
 import com.trustreview.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,14 +107,12 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public List<GroupDto> getAllGroups(String assignmentId) {
-        List<Group> groups;
-        if (assignmentId != null && !assignmentId.isBlank()) {
-            groups = groupRepository.findByAssignmentId(assignmentId);
-        } else {
-            groups = groupRepository.findAllByOrderByCreatedAtDesc();
-        }
-        return groups.stream().map(this::toDto).collect(Collectors.toList());
+    public Page<GroupDto> getAllGroups(String assignmentId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Group> groups = (assignmentId != null && !assignmentId.isBlank())
+                ? groupRepository.findByAssignmentId(assignmentId, pageable)
+                : groupRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return groups.map(this::toDto);
     }
 
     @Transactional(readOnly = true)

@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -103,7 +105,7 @@ class AppealAuthorizationTest {
     }
 
     @Test
-    @WithMockUser(username = "student1@trustreview.edu", roles = "STUDENT")
+    @WithUserDetails(value = "student1@trustreview.edu", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("STUDENT accessing /api/appeals/my-appeals → 200 OK")
     void givenStudentRole_whenGetMyAppeals_thenOk() throws Exception {
         mockMvc.perform(get("/api/appeals/my-appeals"))

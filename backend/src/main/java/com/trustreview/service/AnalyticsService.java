@@ -10,15 +10,24 @@ import com.trustreview.repository.ReviewRepository;
 import com.trustreview.repository.CalibrationScoreRepository;
 import com.trustreview.repository.ReviewRatingRepository;
 import com.trustreview.repository.UserRepository;
-import com.trustreview.model.CalibrationScore;
-import com.trustreview.model.ReviewRating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Dashboard metrics aggregated in SQL (COUNT/GROUP BY pushed to the repository layer) rather
+ * than loading entire tables with findAll() and aggregating in Java streams — the latter does
+ * not survive real data volume. The one exception is the score-distribution histogram: the
+ * `scores` column is an unparsed JSON blob, so binning it still requires fetching the relevant
+ * rows and parsing JSON in Java. That is a known limitation (would need the scores column
+ * normalized to fix properly), not something this pass addresses — it is however now scoped to
+ * only the completed+instructor-scoped rows it actually needs, not the whole table.
+ */
 @Service
 public class AnalyticsService {
 
@@ -57,30 +66,21 @@ public class AnalyticsService {
     public AnalyticsDashboardDto getDashboardMetrics(User currentUser) {
         AnalyticsDashboardDto dto = new AnalyticsDashboardDto();
         boolean isScopedInstructor = currentUser != null && currentUser.getRole() == Role.INSTRUCTOR;
+        String instructorId = isScopedInstructor ? currentUser.getId() : null;
 
-        // 1. Review Completion
-        List<Review> allReviews = reviewRepository.findAll();
-        if (isScopedInstructor) {
-            allReviews = allReviews.stream()
-                    .filter(r -> r.getSubmission() != null &&
-                            r.getSubmission().getAssignment() != null &&
-                            r.getSubmission().getAssignment().getCreatedBy() != null &&
-                            r.getSubmission().getAssignment().getCreatedBy().getId().equals(currentUser.getId()))
-                    .toList();
-        }
-
-        long totalAssigned = allReviews.size();
-        long completed = allReviews.stream().filter(r -> "COMPLETED".equalsIgnoreCase(r.getStatus())).count();
+        // 1 & 2. Review Completion + Score Distribution — one scoped query for the completed
+        // list serves both purposes: its size is "completed", and its `scores` JSON feeds the
+        // histogram below. totalAssigned is a pure COUNT, never materializing any rows.
+        long totalAssigned = reviewRepository.countAllScoped(instructorId);
+        List<Review> completedReviews = reviewRepository.findByStatusScoped("COMPLETED", instructorId);
+        long completed = completedReviews.size();
         long pending = Math.max(0, totalAssigned - completed);
         double completionRate = totalAssigned > 0
                 ? Math.round(((double) completed / totalAssigned) * 1000.0) / 10.0
                 : 0.0;
         dto.setReviewCompletion(new AnalyticsDashboardDto.ReviewCompletionDto(totalAssigned, completed, pending, completionRate));
 
-        // 2. Score Distributions (Histogram bins: 0-20, 21-40, 41-60, 61-80, 81-100)
         long[] bins = new long[5]; // [0-20, 21-40, 41-60, 61-80, 81-100]
-        List<Review> completedReviews = allReviews.stream().filter(r -> "COMPLETED".equalsIgnoreCase(r.getStatus())).toList();
-
         for (Review r : completedReviews) {
             if (r.getScores() != null && !r.getScores().isBlank()) {
                 try {
@@ -112,97 +112,68 @@ public class AnalyticsService {
                 new AnalyticsDashboardDto.ScoreDistributionDto("81-100", bins[4])
         ));
 
-        // 3. Dispute Metrics
-        List<Appeal> allAppeals = appealRepository.findAll();
-        if (isScopedInstructor) {
-            allAppeals = allAppeals.stream()
-                    .filter(a -> a.getReview() != null &&
-                            a.getReview().getSubmission() != null &&
-                            a.getReview().getSubmission().getAssignment() != null &&
-                            a.getReview().getSubmission().getAssignment().getCreatedBy() != null &&
-                            a.getReview().getSubmission().getAssignment().getCreatedBy().getId().equals(currentUser.getId()))
-                    .toList();
-        }
+        // 3. Dispute Metrics — GROUP BY pushed to SQL instead of streaming every Appeal row.
         Map<String, Long> byReason = new LinkedHashMap<>();
         for (AppealReason reason : AppealReason.values()) {
             byReason.put(reason.name(), 0L);
         }
+        for (Object[] row : appealRepository.countGroupedByReasonScoped(instructorId)) {
+            AppealReason reason = (AppealReason) row[0];
+            if (reason != null) byReason.put(reason.name(), (Long) row[1]);
+        }
+
         Map<String, Long> byStatus = new LinkedHashMap<>();
         for (AppealStatus status : AppealStatus.values()) {
             byStatus.put(status.name(), 0L);
         }
-
-        for (Appeal a : allAppeals) {
-            if (a.getReason() != null) {
-                byReason.put(a.getReason().name(), byReason.getOrDefault(a.getReason().name(), 0L) + 1L);
-            }
-            if (a.getStatus() != null) {
-                byStatus.put(a.getStatus().name(), byStatus.getOrDefault(a.getStatus().name(), 0L) + 1L);
-            }
+        for (Object[] row : appealRepository.countGroupedByStatusScoped(instructorId)) {
+            AppealStatus status = (AppealStatus) row[0];
+            if (status != null) byStatus.put(status.name(), (Long) row[1]);
         }
-        dto.setDisputeMetrics(new AnalyticsDashboardDto.DisputeMetricsDto(byReason, byStatus, allAppeals.size()));
+
+        long totalDisputes = appealRepository.countAllScoped(instructorId);
+        dto.setDisputeMetrics(new AnalyticsDashboardDto.DisputeMetricsDto(byReason, byStatus, totalDisputes));
 
         // 4. Disclosure Tier Metrics
         Map<String, Long> tierMetrics = new LinkedHashMap<>();
         for (DisclosureLevel level : DisclosureLevel.values()) {
             tierMetrics.put(level.name(), 0L);
         }
-
-        List<DisclosureRequest> approvedRequests =
-                disclosureRequestRepository.findByStatus(DisclosureStatus.APPROVED);
-        if (isScopedInstructor) {
-            approvedRequests = approvedRequests.stream()
-                    .filter(dr -> dr.getAppeal() != null &&
-                            dr.getAppeal().getReview() != null &&
-                            dr.getAppeal().getReview().getSubmission() != null &&
-                            dr.getAppeal().getReview().getSubmission().getAssignment() != null &&
-                            dr.getAppeal().getReview().getSubmission().getAssignment().getCreatedBy() != null &&
-                            dr.getAppeal().getReview().getSubmission().getAssignment().getCreatedBy().getId().equals(currentUser.getId()))
-                    .toList();
+        for (Object[] row : disclosureRequestRepository.countGroupedByRequestedLevelScoped(DisclosureStatus.APPROVED, instructorId)) {
+            DisclosureLevel level = (DisclosureLevel) row[0];
+            if (level != null) tierMetrics.put(level.name(), (Long) row[1]);
         }
 
-        for (DisclosureRequest dr : approvedRequests) {
-            if (dr.getRequestedLevel() != null) {
-                tierMetrics.put(dr.getRequestedLevel().name(),
-                        tierMetrics.getOrDefault(dr.getRequestedLevel().name(), 0L) + 1L);
-            }
-        }
-
-        // Count reviews that remained anonymous (total reviews - approved disclosures)
-        long totalApprovedDisclosures = approvedRequests.size();
+        // Count of reviews that remained anonymous (total reviews - approved disclosures)
+        long totalApprovedDisclosures = disclosureRequestRepository.countByStatusScoped(DisclosureStatus.APPROVED, instructorId);
         long anonymousCount = Math.max(0, totalAssigned - totalApprovedDisclosures);
         tierMetrics.put("LEVEL_0_ANONYMOUS", anonymousCount);
 
         dto.setDisclosureTierMetrics(tierMetrics);
 
-        // 5. Reviewer Quality Metrics (Calibration & Author Feedback Ratings)
-        List<CalibrationScore> allCalScores = calibrationScoreRepository.findAll();
-        double avgCalScore = 0.0;
-        if (!allCalScores.isEmpty()) {
-            double sum = allCalScores.stream().mapToDouble(CalibrationScore::getAccuracyPercentage).sum();
-            avgCalScore = Math.round((sum / allCalScores.size()) * 10.0) / 10.0;
-        }
+        // 5. Reviewer Quality Metrics (Calibration & Author Feedback Ratings).
+        // Not instructor-scoped, matching the prior behavior exactly (these are course-wide
+        // reviewer-reliability signals, not tied to a specific instructor's assignments).
+        Double avgCalScoreRaw = calibrationScoreRepository.findAverageAccuracyPercentage();
+        double avgCalScore = avgCalScoreRaw != null ? Math.round(avgCalScoreRaw * 10.0) / 10.0 : 0.0;
 
-        long totalStudents = userRepository.findAll().stream().filter(u -> u.getRole() == Role.STUDENT).count();
-        long calibratedStudents = allCalScores.stream().map(cs -> cs.getStudent().getId()).distinct().count();
+        long totalStudents = userRepository.countByRole(Role.STUDENT);
+        long calibratedStudents = calibrationScoreRepository.countDistinctStudents();
         double calCompletionRate = totalStudents > 0
                 ? Math.round(((double) calibratedStudents / totalStudents) * 1000.0) / 10.0
                 : 0.0;
 
-        List<ReviewRating> allRatings = reviewRatingRepository.findAll();
-        double avgFeedbackRating = 0.0;
-        double helpfulnessRate = 0.0;
-        if (!allRatings.isEmpty()) {
-            double sumRatings = allRatings.stream().mapToInt(ReviewRating::getRating).sum();
-            avgFeedbackRating = Math.round((sumRatings / allRatings.size()) * 10.0) / 10.0;
-            long helpfulCount = allRatings.stream().filter(r -> Boolean.TRUE.equals(r.getIsHelpful())).count();
-            helpfulnessRate = Math.round(((double) helpfulCount / allRatings.size()) * 1000.0) / 10.0;
-        }
+        long totalRatings = reviewRatingRepository.count();
+        Double avgRatingRaw = reviewRatingRepository.findAverageRating();
+        double avgFeedbackRating = avgRatingRaw != null ? Math.round(avgRatingRaw * 10.0) / 10.0 : 0.0;
+        long helpfulCount = reviewRatingRepository.countHelpful();
+        double helpfulnessRate = totalRatings > 0
+                ? Math.round(((double) helpfulCount / totalRatings) * 1000.0) / 10.0
+                : 0.0;
 
         dto.setReviewerQuality(new AnalyticsDashboardDto.ReviewerQualityDto(
-                avgCalScore, calCompletionRate, avgFeedbackRating, helpfulnessRate, allRatings.size()
+                avgCalScore, calCompletionRate, avgFeedbackRating, helpfulnessRate, totalRatings
         ));
-
 
         return dto;
     }

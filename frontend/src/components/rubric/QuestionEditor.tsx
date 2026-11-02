@@ -17,11 +17,11 @@ const DEFAULT_OPTIONS_TEMPLATE: RubricOption[] = [
 ];
 
 const OPTION_TIER_LABELS = [
-  { score: 1, label: "Level 1 (Needs Improvement)", color: "text-red-700 bg-red-50 border-red-200" },
-  { score: 2, label: "Level 2 (Developing)", color: "text-amber-700 bg-amber-50 border-amber-200" },
-  { score: 3, label: "Level 3 (Competent)", color: "text-blue-700 bg-blue-50 border-blue-200" },
-  { score: 4, label: "Level 4 (Proficient)", color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
-  { score: 5, label: "Level 5 (Exemplary)", color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+  { score: 1, label: "Level 1 (Needs Improvement)", color: "text-red-700 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/40 dark:border-red-900/50" },
+  { score: 2, label: "Level 2 (Developing)", color: "text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/40 dark:border-amber-900/50" },
+  { score: 3, label: "Level 3 (Competent)", color: "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-900/50" },
+  { score: 4, label: "Level 4 (Proficient)", color: "text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/40 dark:border-indigo-900/50" },
+  { score: 5, label: "Level 5 (Exemplary)", color: "text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/40 dark:border-emerald-900/50" },
 ];
 
 export const QuestionEditor: React.FC<QuestionEditorProps> = ({
@@ -74,13 +74,13 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h5 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-display flex items-center gap-1.5">
+          <h5 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 font-display flex items-center gap-1.5">
             Evaluation Questions
-            <span className="text-[11px] font-normal text-slate-500 font-body lowercase">
+            <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400 font-body lowercase">
               ({questions.length} {questions.length === 1 ? "question" : "questions"})
             </span>
           </h5>
-          <p className="text-[11px] text-slate-500 font-body mt-0.5">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-body mt-0.5">
             Reviewers choose the sentence that best describes the work. The criterion score is the average of question scores.
           </p>
         </div>
@@ -89,7 +89,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
           type="button"
           onClick={handleAddQuestion}
           disabled={disabled || questions.length >= 6}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-peerity-100 text-peerity-800 hover:bg-peerity-200 border border-peerity-200 transition disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-peerity-100 text-peerity-800 hover:bg-peerity-200 border border-peerity-200 dark:bg-teal-900/30 dark:text-teal-400 dark:hover:bg-teal-900/50 dark:border-teal-800 transition disabled:opacity-50"
         >
           <Plus className="w-3.5 h-3.5" />
           Add Question
@@ -106,18 +106,18 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
           return (
             <div
               key={qIndex}
-              className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs transition-shadow"
+              className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs transition-shadow"
             >
               {/* Question Header Accordion Bar */}
               <div
-                className="p-3 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between cursor-pointer select-none"
+                className="p-3 bg-slate-50/70 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between cursor-pointer select-none"
                 onClick={() => toggleExpand(qIndex)}
               >
                 <div className="flex items-center gap-2 min-w-0 pr-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-peerity-200 text-peerity-900 flex-shrink-0">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-peerity-200 text-peerity-900 dark:bg-teal-900/40 dark:text-teal-300 flex-shrink-0">
                     Q{qIndex + 1}
                   </span>
-                  <span className="text-xs font-semibold text-slate-800 truncate font-display">
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate font-display">
                     {q.prompt || "Untitled Question"}
                   </span>
                 </div>
@@ -131,7 +131,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                         e.stopPropagation();
                         handleRemoveQuestion(qIndex);
                       }}
-                      className="p-1 text-slate-400 hover:text-red-600 rounded transition"
+                      className="p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 rounded transition"
                       title="Remove Question"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   )}
                   <button
                     type="button"
-                    className="p-1 text-slate-400 hover:text-slate-600 rounded"
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 rounded"
                   >
                     {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   </button>
@@ -150,7 +150,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
               {isExpanded && (
                 <div className="p-3.5 space-y-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1 font-display">
+                    <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1 font-display">
                       Question Prompt
                     </label>
                     <input
@@ -159,12 +159,12 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                       value={q.prompt}
                       onChange={(e) => handlePromptChange(qIndex, e.target.value)}
                       placeholder="e.g. How thoroughly are edge cases and invalid inputs handled?"
-                      className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-peerity-600 font-body"
+                      className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-peerity-600 font-body"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 font-display">
+                    <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5 font-display">
                       Descriptive Sentences (1–5 Scale)
                     </label>
                     <div className="space-y-2">
@@ -174,7 +174,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                         return (
                           <div
                             key={optIndex}
-                            className="flex items-start gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100"
+                            className="flex items-start gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700"
                           >
                             <span
                               className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 mt-0.5 whitespace-nowrap ${tier.color}`}
@@ -187,7 +187,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
                               value={opt.text}
                               onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
                               placeholder={`Describe what behavior qualifies for score ${optIndex + 1}...`}
-                              className="flex-1 text-xs px-2.5 py-1.5 rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-peerity-600 font-body resize-y"
+                              className="flex-1 text-xs px-2.5 py-1.5 rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-peerity-600 font-body resize-y"
                             />
                           </div>
                         );

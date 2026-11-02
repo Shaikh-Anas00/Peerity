@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { Dashboard } from "./pages/Dashboard";
 import { Unauthorized } from "./pages/Unauthorized";
 import { AssignmentsPage } from "./pages/AssignmentsPage";
@@ -28,9 +30,11 @@ export const App: React.FC = () => (
     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
     {/* ── Public auth pages ───────────────────────────── */}
-    <Route path="/login"        element={<Login />} />
-    <Route path="/register"     element={<Register />} />
-    <Route path="/unauthorized" element={<Unauthorized />} />
+    <Route path="/login"           element={<Login />} />
+    <Route path="/register"        element={<Register />} />
+    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+    <Route path="/reset-password"  element={<ResetPasswordPage />} />
+    <Route path="/unauthorized"    element={<Unauthorized />} />
 
     {/* ── Authenticated — all roles ─────────────────── */}
     <Route element={<AppLayout />}>

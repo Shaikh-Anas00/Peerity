@@ -2,16 +2,17 @@ package com.trustreview.controller;
 
 import com.trustreview.dto.*;
 import com.trustreview.model.User;
-import com.trustreview.repository.UserRepository;
+import com.trustreview.security.PeerityUserDetails;
 import com.trustreview.service.AppealService;
 import com.trustreview.service.QuorumService;
 import com.trustreview.util.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,16 +23,13 @@ public class AppealController {
 
     private final AppealService appealService;
     private final QuorumService quorumService;
-    private final UserRepository userRepository;
     private final ClientIpResolver clientIpResolver;
 
     public AppealController(AppealService appealService,
                             QuorumService quorumService,
-                            UserRepository userRepository,
                             ClientIpResolver clientIpResolver) {
         this.appealService = appealService;
         this.quorumService = quorumService;
-        this.userRepository = userRepository;
         this.clientIpResolver = clientIpResolver;
     }
 
@@ -43,20 +41,12 @@ public class AppealController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> createAppeal(
             @Valid @RequestBody CreateAppealRequest req,
-            Authentication auth,
+            @AuthenticationPrincipal PeerityUserDetails principal,
             HttpServletRequest httpRequest) {
-        try {
-            User appellant = resolveUser(auth);
-            String clientIp = clientIpResolver.resolveClientIp(httpRequest);
-            AppealDto dto = appealService.createAppeal(req, appellant, clientIp);
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, ex.getMessage()));
-        } catch (SecurityException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, ex.getMessage()));
-        } catch (IllegalStateException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, ex.getMessage()));
-        }
+        User appellant = principal.getUser();
+        String clientIp = clientIpResolver.resolveClientIp(httpRequest);
+        AppealDto dto = appealService.createAppeal(req, appellant, clientIp);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     /**
@@ -65,43 +55,26 @@ public class AppealController {
      */
     @GetMapping("/appeals/my-appeals")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<AppealDto>> getMyAppeals(Authentication auth) {
-        User appellant = resolveUser(auth);
+    public ResponseEntity<List<AppealDto>> getMyAppeals(@AuthenticationPrincipal PeerityUserDetails principal) {
+        User appellant = principal.getUser();
         return ResponseEntity.ok(appealService.getMyAppeals(appellant));
     }
 
     /**
      * GET /api/appeals/pending — COMMITTEE, ADMIN, INSTRUCTOR.
-     * Returns open disputes awaiting adjudication.
+     * Returns open disputes awaiting adjudication (paginated).
      */
     @GetMapping("/appeals/pending")
     @PreAuthorize("hasAnyRole('COMMITTEE','ADMIN','INSTRUCTOR')")
-    public ResponseEntity<List<AppealDto>> getPendingAppeals() {
-        return ResponseEntity.ok(appealService.getPendingAppeals());
-    }
-
-    /**
-     * POST /api/appeals/{id}/resolve — COMMITTEE, ADMIN (Phase 4 legacy single-admin path).
-     * Retained for backward compatibility; Phase 5 uses /vote instead.
-     */
-    @PostMapping("/appeals/{id}/resolve")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> resolveAppeal(
-            @PathVariable String id,
-            @Valid @RequestBody ResolveAppealRequest req,
-            Authentication auth) {
-        try {
-            User resolver = resolveUser(auth);
-            AppealDto dto = appealService.resolveAppeal(id, req, resolver);
-            return ResponseEntity.ok(dto);
-        } catch (IllegalStateException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, ex.getMessage()));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, ex.getMessage()));
-        }
+    public ResponseEntity<Page<AppealDto>> getPendingAppeals(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(appealService.getPendingAppeals(page, size));
     }
 
     // ── Phase 5: Quorum Voting Endpoints ─────────────────────────────────────
+    // (The Phase 4 single-admin `/resolve` override has been removed: disclosure may only
+    //  be authorized via QuorumService.castVote(), never by a unilateral admin action.)
 
     /**
      * POST /api/appeals/{id}/vote — COMMITTEE only.
@@ -114,9 +87,9 @@ public class AppealController {
     public ResponseEntity<?> castVote(
             @PathVariable String id,
             @Valid @RequestBody CastVoteRequest req,
-            Authentication auth) {
+            @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
-            User voter = resolveUser(auth);
+            User voter = principal.getUser();
             QuorumStatusDto status = quorumService.castVote(id, voter, req.getDecision(), req.getRationale());
             return ResponseEntity.ok(status);
         } catch (IllegalStateException ex) {
@@ -135,9 +108,9 @@ public class AppealController {
      */
     @GetMapping("/appeals/{id}/votes")
     @PreAuthorize("hasAnyRole('COMMITTEE','ADMIN','INSTRUCTOR')")
-    public ResponseEntity<?> getVotes(@PathVariable String id, Authentication auth) {
+    public ResponseEntity<?> getVotes(@PathVariable String id, @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
-            User user = resolveUser(auth);
+            User user = principal.getUser();
             QuorumStatusDto status = quorumService.getQuorumStatus(id, user);
             return ResponseEntity.ok(status);
         } catch (IllegalArgumentException ex) {
@@ -151,9 +124,9 @@ public class AppealController {
      * Defaults to LEVEL_0_ANONYMOUS unless disclosure quorum is APPROVED.
      */
     @GetMapping("/reviews/{id}/disclosed-identity")
-    public ResponseEntity<?> getDisclosedIdentity(@PathVariable String id, Authentication auth) {
+    public ResponseEntity<?> getDisclosedIdentity(@PathVariable String id, @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
-            User user = resolveUser(auth);
+            User user = principal.getUser();
             DisclosedIdentityDto dto = appealService.getDisclosedIdentity(id, user);
             return ResponseEntity.ok(dto);
         } catch (SecurityException ex) {
@@ -161,10 +134,5 @@ public class AppealController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(false, ex.getMessage()));
         }
-    }
-
-    private User resolveUser(Authentication auth) {
-        return userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
     }
 }

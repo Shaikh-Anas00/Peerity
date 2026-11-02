@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.trustreview.service.CryptoServiceClient;
+import com.trustreview.service.FileCryptoService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -15,21 +15,22 @@ import java.util.Map;
 @RequestMapping("/api/test")
 public class TestController {
 
-    private final CryptoServiceClient cryptoServiceClient;
+    private final FileCryptoService fileCryptoService;
 
-    public TestController(CryptoServiceClient cryptoServiceClient) {
-        this.cryptoServiceClient = cryptoServiceClient;
+    public TestController(FileCryptoService fileCryptoService) {
+        this.fileCryptoService = fileCryptoService;
     }
 
     /**
      * GET /api/test/crypto-health — ADMIN only.
-     * Validates that the PHP 8.2+ sidecar is responsive.
-     * This diagnostic endpoint is surfaced in the /admin/diagnostics panel (Part 2).
+     * Validates that the in-process AES-256-GCM crypto subsystem and its encrypted storage
+     * directory are operational. This diagnostic endpoint is surfaced in the
+     * /admin/diagnostics panel.
      */
     @GetMapping("/crypto-health")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> cryptoHealth() {
-        return ResponseEntity.ok(cryptoServiceClient.checkHealth());
+        return ResponseEntity.ok(fileCryptoService.checkHealth());
     }
 
     /**

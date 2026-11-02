@@ -34,7 +34,7 @@ public class Submission {
     @Column(name = "file_type", length = 100)
     private String fileType;
 
-    /** Phase 3: encrypted file name in php-service/storage/encrypted/<uuid>.enc */
+    /** Encrypted file name under the encrypted storage directory (see FileCryptoService), e.g. {@code <uuid>.enc} */
     @Column(name = "file_path", length = 500)
     private String filePath;
 

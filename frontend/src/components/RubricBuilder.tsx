@@ -136,21 +136,21 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
   return (
     <div className="space-y-4 font-body">
       {/* Template Picker Section */}
-      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+      <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
         <TemplatePicker
           selectedTemplateId={selectedTemplateId}
           onSelectTemplate={handleApplyTemplate}
         />
 
         {/* Global Rubric Controls (Weights, Live Preview) */}
-        <div className="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="pt-3 border-t border-slate-200/80 dark:border-slate-700/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-1.5 text-xs text-slate-700 cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={useWeights}
                 onChange={e => handleToggleWeights(e.target.checked)}
-                className="rounded text-peerity-800 focus:ring-peerity-600 w-3.5 h-3.5"
+                className="rounded text-peerity-800 focus:ring-peerity-600 w-3.5 h-3.5 dark:bg-slate-800 dark:border-slate-600"
               />
               <span className="font-semibold">Weighted Rubric</span>
             </label>
@@ -159,8 +159,8 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
               <span
                 className={`font-mono font-bold text-xs px-2 py-0.5 rounded ${
                   weightTotal === 100
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "bg-amber-100 text-amber-800"
+                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
+                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400"
                 }`}
               >
                 Sum: {weightTotal}% / 100% {weightTotal === 100 ? "✓ Balanced" : "(must sum to 100%)"}
@@ -173,8 +173,8 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
             onClick={() => setShowPreview(!showPreview)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
               showPreview
-                ? "bg-peerity-800 text-white border-peerity-800"
-                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                ? "bg-peerity-800 text-white border-peerity-800 dark:bg-teal-600 dark:border-teal-600"
+                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700"
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -184,20 +184,20 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
+        <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-xs rounded-xl">
           {error}
         </div>
       )}
 
       {/* Reviewer Scoring Preview Mode */}
       {showPreview ? (
-        <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-          <div className="bg-slate-100/80 px-4 py-2 border-b border-slate-200 text-xs font-semibold text-slate-600 flex items-center justify-between">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-xs">
+          <div className="bg-slate-100/80 dark:bg-slate-800 px-4 py-2 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center justify-between">
             <span>Live Student Scoring Preview (Interactive)</span>
             <button
               type="button"
               onClick={() => setShowPreview(false)}
-              className="text-peerity-800 hover:underline font-bold"
+              className="text-peerity-800 dark:text-teal-400 hover:underline font-bold"
             >
               Return to editor
             </button>
@@ -220,27 +220,27 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
             return (
               <div
                 key={idx}
-                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden transition-all"
+                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-700 shadow-2xs overflow-hidden transition-all"
               >
                 {/* Header row */}
-                <div className="p-3.5 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between gap-2">
+                <div className="p-3.5 bg-slate-50/70 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="w-5 h-5 rounded-full bg-peerity-100 text-peerity-800 text-xs font-bold flex items-center justify-center flex-shrink-0 font-display">
+                    <span className="w-5 h-5 rounded-full bg-peerity-100 text-peerity-800 dark:bg-teal-900/30 dark:text-teal-400 text-xs font-bold flex items-center justify-center flex-shrink-0 font-display">
                       {idx + 1}
                     </span>
                     <input
                       value={c.name}
                       onChange={e => handleCriterionChange(idx, { name: e.target.value })}
                       placeholder="Criterion Name (e.g. Correctness)"
-                      className="font-bold text-sm text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-peerity-600 focus:bg-white focus:outline-none px-1 py-0.5 rounded truncate flex-1"
+                      className="font-bold text-sm text-slate-900 dark:text-slate-100 bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-peerity-600 focus:bg-white dark:focus:bg-slate-800 focus:outline-none px-1 py-0.5 rounded truncate flex-1"
                     />
 
                     {/* Compact type pill */}
                     <span
                       className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border hidden sm:inline-block ${
                         isQuestionType
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : "bg-blue-50 text-blue-700 border-blue-200"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50"
+                          : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50"
                       }`}
                     >
                       {isQuestionType ? "Question-Based" : "Levels"}
@@ -249,8 +249,8 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
 
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     {useWeights && (
-                      <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase">Weight:</span>
+                      <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-0.5">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">Weight:</span>
                         <input
                           type="number"
                           min={1}
@@ -261,9 +261,9 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                               weight: e.target.value === "" ? null : Number(e.target.value),
                             })
                           }
-                          className="w-10 text-xs font-bold text-slate-800 text-right focus:outline-none"
+                          className="w-10 text-xs font-bold text-slate-800 dark:text-slate-200 dark:bg-transparent text-right focus:outline-none"
                         />
-                        <span className="text-xs text-slate-500 font-medium">%</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">%</span>
                       </div>
                     )}
 
@@ -271,7 +271,7 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                       type="button"
                       disabled={idx === 0}
                       onClick={() => handleMove(idx, "up")}
-                      className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-20 rounded"
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 disabled:opacity-20 rounded"
                       title="Move up"
                     >
                       <ArrowUp className="w-3.5 h-3.5" />
@@ -280,7 +280,7 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                       type="button"
                       disabled={idx === criteria.length - 1}
                       onClick={() => handleMove(idx, "down")}
-                      className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-20 rounded"
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 disabled:opacity-20 rounded"
                       title="Move down"
                     >
                       <ArrowDown className="w-3.5 h-3.5" />
@@ -289,7 +289,7 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                       type="button"
                       disabled={criteria.length <= 1}
                       onClick={() => handleRemoveCriterion(idx)}
-                      className="p-1 text-slate-400 hover:text-red-600 disabled:opacity-20 rounded"
+                      className="p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 disabled:opacity-20 rounded"
                       title="Delete criterion"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -297,7 +297,7 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                     <button
                       type="button"
                       onClick={() => toggleExpand(idx)}
-                      className="p-1 text-slate-400 hover:text-slate-600 rounded"
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 rounded"
                       title={isExpanded ? "Collapse" : "Expand"}
                     >
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -307,19 +307,19 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
 
                 {/* Expanded Details: Type toggle + questions or 4 levels */}
                 {isExpanded && (
-                  <div className="p-4 space-y-4 bg-white">
+                  <div className="p-4 space-y-4 bg-white dark:bg-slate-900">
                     {/* Evaluation Type Segmented Control */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 font-display">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 font-display">
                           Evaluation Model
                         </span>
-                        <p className="text-[11px] text-slate-500 font-body">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-body">
                           Choose how reviewers evaluate this criterion.
                         </p>
                       </div>
 
-                      <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                      <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-0.5">
                         <button
                           type="button"
                           onClick={() => {
@@ -341,8 +341,8 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                           }}
                           className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
                             isQuestionType
-                              ? "bg-white text-peerity-900 shadow-2xs font-bold"
-                              : "text-slate-600 hover:text-slate-900"
+                              ? "bg-white dark:bg-slate-700 text-peerity-900 dark:text-teal-300 shadow-2xs font-bold"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                           }`}
                         >
                           Question-Based (Sentences)
@@ -361,8 +361,8 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                           }}
                           className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
                             !isQuestionType
-                              ? "bg-white text-peerity-900 shadow-2xs font-bold"
-                              : "text-slate-600 hover:text-slate-900"
+                              ? "bg-white dark:bg-slate-700 text-peerity-900 dark:text-teal-300 shadow-2xs font-bold"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                           }`}
                         >
                           Scale with Levels (4 Tiers)
@@ -372,14 +372,14 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
 
                     {/* Criterion Description / Prompt */}
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 font-display">
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 font-display">
                         Criterion Summary / Intent
                       </label>
                       <input
                         value={c.description ?? ""}
                         onChange={e => handleCriterionChange(idx, { description: e.target.value })}
                         placeholder="e.g. Evaluates correctness, code structure, and adherence to requirements."
-                        className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-peerity-600 font-body"
+                        className="w-full text-xs px-3 py-1.5 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-peerity-600 font-body"
                       />
                     </div>
 
@@ -395,14 +395,14 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                       </div>
                     ) : (
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 font-display">
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 font-display">
                           4 Performance Levels & Descriptors
                         </label>
                         <div className="space-y-2">
                           {(c.levels || DEFAULT_LEVEL_TEMPLATES).map((lvl, lIdx) => (
                             <div
                               key={lIdx}
-                              className="p-2.5 rounded-lg border border-slate-200/80 bg-slate-50/50 space-y-1.5"
+                              className="p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5"
                             >
                               <div className="flex items-center justify-between gap-2">
                                 <input
@@ -411,9 +411,9 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                                     handleLevelChange(idx, lIdx, { label: e.target.value })
                                   }
                                   placeholder="Level Label"
-                                  className="text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-peerity-600 w-36"
+                                  className="text-xs font-bold text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-peerity-600 w-36"
                                 />
-                                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/70 text-slate-700">
+                                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                                   {lvl.scoreRange ?? `${lvl.score} pts`}
                                 </span>
                               </div>
@@ -425,7 +425,7 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
                                 }
                                 rows={2}
                                 placeholder="Behavioral descriptor explaining what work at this performance level looks like..."
-                                className="w-full text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-peerity-600 resize-none font-body leading-relaxed"
+                                className="w-full text-xs px-2.5 py-1.5 bg-white dark:bg-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-peerity-600 resize-none font-body leading-relaxed"
                               />
                             </div>
                           ))}
@@ -442,7 +442,7 @@ export const RubricBuilder: React.FC<RubricBuilderProps> = ({ criteria, onChange
             <button
               type="button"
               onClick={handleAddCriterion}
-              className="w-full py-2.5 border-2 border-dashed border-slate-200 hover:border-peerity-400 hover:bg-peerity-50/50 rounded-xl text-xs font-bold text-slate-600 hover:text-peerity-800 transition flex items-center justify-center gap-1.5 font-display"
+              className="w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-peerity-400 dark:hover:border-teal-600 hover:bg-peerity-50/50 dark:hover:bg-teal-950/20 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-peerity-800 dark:hover:text-teal-400 transition flex items-center justify-center gap-1.5 font-display"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Rubric Criterion ({criteria.length}/8)

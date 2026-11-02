@@ -1,6 +1,7 @@
 package com.trustreview.model;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,7 +9,11 @@ import java.util.UUID;
 @Table(name = "users", indexes = {
     @Index(name = "idx_user_email", columnList = "email", unique = true)
 })
-public class User {
+public class User implements Serializable {
+
+    // Required so this entity can be carried inside PeerityUserDetails, which Spring
+    // Session JDBC serializes into the SPRING_SESSION table for the life of the session.
+    private static final long serialVersionUID = 1L;
 
     @Id
     @Column(length = 36, nullable = false, updatable = false)
