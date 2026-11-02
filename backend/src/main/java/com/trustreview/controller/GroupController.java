@@ -126,18 +126,12 @@ public class GroupController {
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<ApiResponse> deleteGroup(@PathVariable String groupId,
                                                    @RequestParam(value = "force", defaultValue = "false") boolean force,
-                                                   Authentication auth,
+                                                   @AuthenticationPrincipal PeerityUserDetails principal,
                                                    HttpServletRequest req) {
-        User actor = resolveUser(auth);
+        User actor = principal.getUser();
         String ip = clientIpResolver.resolveClientIp(req);
-        try {
-            String resultMessage = groupService.deleteGroup(groupId, force, actor, ip);
-            return ResponseEntity.ok(new ApiResponse(true, resultMessage));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage()));
-        }
+        String resultMessage = groupService.deleteGroup(groupId, force, actor, ip);
+        return ResponseEntity.ok(new ApiResponse(true, resultMessage));
     }
 
     /**
