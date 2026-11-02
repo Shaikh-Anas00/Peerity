@@ -7,7 +7,6 @@
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
-[![PHP](https://img.shields.io/badge/PHP-8.2%20Sidecar-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Security](https://img.shields.io/badge/Security-Argon2id%20%7C%20AES--256--GCM-critical)](#-security--cryptography)
 
 ---
@@ -43,7 +42,7 @@ Unlike conventional learning management systems, Peerity enforces **double-blind
 - **Flexible Document Viewer**: Embedded PDF viewer supporting continuous page navigation, zooming, panning, and responsive scaling.
 
 ### 🔐 Cryptographic Integrity & Tamper-Evident Ledger
-- **AES-256-GCM Envelope Encryption**: Submission files are encrypted at rest by a sandboxed PHP sidecar using 12-byte IVs and 16-byte authentication tags.
+- **AES-256-GCM Envelope Encryption**: Submission files are encrypted at rest in-process using 12-byte IVs and 16-byte authentication tags.
 - **HMAC-SHA256 Chained Audit Ledger**: Every security, vote, login, and disclosure event is recorded in an immutable, chained hash sequence that prevents retroactive modification even by DB admins.
 - **Argon2id Password Hashing**: State-of-the-art password protection adhering to OWASP recommendations.
 
@@ -65,7 +64,7 @@ Unlike conventional learning management systems, Peerity enforces **double-blind
 | **Backend Core** | Java 21+, Spring Boot 3.3.3, Spring Security 6, Spring Data JPA, Spring Session (JDBC) |
 | **Database** | MySQL 8.0 (Relational schema, session persistence, indexed audit logs) |
 | **Frontend UI** | React 18, TypeScript, Vite, Tailwind CSS, Lucide React, PDF.js, React Router v6 |
-| **Crypto Sidecar** | PHP 8.2 with OpenSSL (AES-256-GCM) & PDO extensions (restricted to local loopback) |
+| **Crypto** | In-process AES-256-GCM (`javax.crypto`) — see `FileCryptoService` |
 | **Auth & Security** | Stateful `JSESSIONID` (HttpOnly, SameSite=Lax), Double-Submit CSRF tokens, Argon2id |
 
 ---
@@ -79,7 +78,6 @@ Make sure you have the following installed on your machine:
 - **Java JDK 21+**: [adoptium.net](https://adoptium.net/)
 - **Node.js 18+ & npm**: [nodejs.org](https://nodejs.org/)
 - **MySQL 8.0+**: Running on port `3306` (e.g., via MySQL Community Server or XAMPP)
-- **PHP 8.2+**: With `openssl` and `pdo` extensions enabled (e.g., in `C:\xampp\php` or system PATH)
 
 ---
 
@@ -108,31 +106,23 @@ spring.datasource.password=
 ### Step 3: Run the Services
 
 #### Option A: One-Click Windows Launchers (Recommended)
-Open three terminal windows (or double-click the `.bat` files in the root folder):
-1. **PHP Crypto Sidecar** (Port 8000):
-   ```cmd
-   run-php.bat
-   ```
-2. **Spring Boot Backend** (Port 5000):
+Open two terminal windows (or double-click the `.bat` files in the root folder):
+1. **Spring Boot Backend** (Port 5000):
    ```cmd
    run-backend.bat
    ```
-3. **React Frontend** (Port 5173):
+2. **React Frontend** (Port 5173):
    ```cmd
    run-frontend.bat
    ```
 
 #### Option B: Manual Command Line Execution
 ```bash
-# Terminal 1: Start PHP Crypto Sidecar (Port 8000)
-cd php-service
-php -S 127.0.0.1:8000 -t src
-
-# Terminal 2: Start Spring Boot Core (Port 5000)
+# Terminal 1: Start Spring Boot Core (Port 5000)
 cd backend
 ./mvnw spring-boot:run     # Windows: .\mvnw.cmd spring-boot:run
 
-# Terminal 3: Start React Vite Frontend (Port 5173)
+# Terminal 2: Start React Vite Frontend (Port 5173)
 cd frontend
 npm install
 npm run dev
@@ -169,6 +159,32 @@ cd frontend
 npx tsc --noEmit
 npm run build
 ```
+
+---
+
+## 🔐 Production Deployment — Required Environment Variables
+
+Local dev relies on committed fallback secrets so the app runs out of the box. **Before
+deploying anywhere real, set these as actual environment variables** — do not rely on the
+defaults:
+
+| Variable | Set on | Purpose |
+| :--- | :--- | :--- |
+| `SPRING_PROFILES_ACTIVE=prod` | Backend | Activates `application-prod.properties` and the startup secret guard below |
+| `AUDIT_LEDGER_HMAC_SECRET` | Backend | Keys the tamper-evident audit hash chain |
+| `APP_KEY` | Backend | Derives the AES-256-GCM master encryption key for submission files (in-process — see `FileCryptoService`) |
+| `CLIENT_URL` | Backend | Exact frontend origin for CORS once `localhost` is no longer valid |
+
+With `SPRING_PROFILES_ACTIVE=prod` set, the backend **refuses to start** if
+`AUDIT_LEDGER_HMAC_SECRET` or `APP_KEY` still equal their committed defaults (see
+`ProductionSecretsGuard`). Full rationale for each setting is in
+`docs/CONFIG_SECURITY_ANALYSIS.md`.
+
+Schema is managed by Flyway (`backend/src/main/resources/db/migration/`), not
+`ddl-auto`. On first startup against an empty database, Flyway creates the full schema from
+`V1__baseline.sql`; against an already-populated database (e.g. one previously managed by
+`ddl-auto=update`), it adopts the existing schema as already-baselined instead of re-running
+`V1`. No manual migration step is required — it runs automatically on startup.
 
 ---
 
