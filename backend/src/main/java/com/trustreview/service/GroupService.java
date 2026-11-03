@@ -360,6 +360,17 @@ public class GroupService {
             throw new IllegalArgumentException("The specified user is not an active member of this group.");
         }
 
+        // k >= 3 anonymity floor: group must have at least 3 active members for anonymous peer evaluation
+        long activeMemberCount = membershipRepository.findByGroupId(group.getId()).stream()
+                .filter(m -> m.getStatus() == MembershipStatus.ACTIVE)
+                .count();
+        if (activeMemberCount < FEEDBACK_K_ANONYMITY_FLOOR) {
+            throw new IllegalStateException(
+                    "Group must have at least " + FEEDBACK_K_ANONYMITY_FLOOR +
+                    " active members for anonymous peer evaluation (k >= 3 floor)."
+            );
+        }
+
         GroupMemberEvaluation evaluation = new GroupMemberEvaluation();
         evaluation.setGroup(group);
         evaluation.setEvaluator(evaluator);

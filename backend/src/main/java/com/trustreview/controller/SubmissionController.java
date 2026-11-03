@@ -2,6 +2,7 @@ package com.trustreview.controller;
 
 import com.trustreview.dto.ApiResponse;
 import com.trustreview.dto.SubmissionDto;
+import com.trustreview.exception.InsufficientAnonymitySetException;
 import com.trustreview.model.User;
 import com.trustreview.security.PeerityUserDetails;
 import com.trustreview.service.AssignmentService;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -40,20 +42,23 @@ public class SubmissionController {
     }
 
     /**
-     * POST /api/submissions -- STUDENT only
-     * Accepts multipart/form-data containing assignmentId and file.
+     * POST /api/submissions
+     * Student submits file artifact for an assignment (individual or classroom-scoped).
      * Encrypts the file in-process with AES-256-GCM before persisting it.
      */
     @PostMapping(value = "/submissions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> submitWithFile(
             @RequestParam("assignmentId") String assignmentId,
+            @RequestParam(value = "courseRoomId", required = false) String courseRoomId,
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
             User author = principal.getUser();
-            SubmissionDto dto = submissionService.createWithFile(assignmentId, file, author);
+            SubmissionDto dto = submissionService.createWithFile(assignmentId, file, author, courseRoomId);
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        } catch (AccessDeniedException | SecurityException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, ex.getMessage()));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, ex.getMessage()));
         } catch (Exception ex) {
@@ -84,7 +89,7 @@ public class SubmissionController {
                     .contentType(MediaType.parseMediaType(contentType))
                     .contentLength(payload.data().length)
                     .body(payload.data());
-        } catch (SecurityException ex) {
+        } catch (AccessDeniedException | SecurityException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResponse(false, ex.getMessage()));
         } catch (IllegalArgumentException ex) {
@@ -100,27 +105,35 @@ public class SubmissionController {
     /** GET /api/submissions/my -- STUDENT's own submissions */
     @GetMapping("/submissions/my")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<SubmissionDto>> mySubmissions(@AuthenticationPrincipal PeerityUserDetails principal) {
+    public ResponseEntity<List<SubmissionDto>> mySubmissions(
+            @RequestParam(value = "courseRoomId", required = false) String courseRoomId,
+            @AuthenticationPrincipal PeerityUserDetails principal) {
         User user = principal.getUser();
-        return ResponseEntity.ok(submissionService.findMySubmissions(user));
+        return ResponseEntity.ok(submissionService.findMySubmissions(user, courseRoomId));
     }
 
     /**
      * POST /api/assignments/{id}/distribute -- INSTRUCTOR/ADMIN
      * Body (optional): { "reviewerCount": 2 }
+     * Query (optional): ?courseRoomId={id}
      */
     @PostMapping("/assignments/{id}/distribute")
     @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
     public ResponseEntity<?> distribute(
             @PathVariable String id,
+            @RequestParam(value = "courseRoomId", required = false) String courseRoomId,
             @RequestBody(required = false) Map<String, Integer> body,
             @AuthenticationPrincipal PeerityUserDetails principal) {
         try {
             int count = (body != null && body.containsKey("reviewerCount"))
                     ? body.get("reviewerCount") : 2;
             User requestor = principal.getUser();
-            Map<String, Object> result = reviewService.distribute(id, count, requestor);
+            Map<String, Object> result = reviewService.distribute(id, count, requestor, courseRoomId);
             return ResponseEntity.ok(result);
+        } catch (InsufficientAnonymitySetException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, ex.getMessage()));
+        } catch (AccessDeniedException | SecurityException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, ex.getMessage()));
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(new ApiResponse(false, ex.getMessage()));
         }

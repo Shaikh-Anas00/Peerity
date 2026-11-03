@@ -1,5 +1,6 @@
 package com.trustreview.repository;
 
+import com.trustreview.model.CourseRoom;
 import com.trustreview.model.Review;
 import com.trustreview.model.Submission;
 import com.trustreview.model.User;
@@ -32,4 +33,16 @@ public interface ReviewRepository extends JpaRepository<Review, String> {
 
     @Query("SELECT r FROM Review r WHERE r.status = :status AND (:instructorId IS NULL OR r.submission.assignment.createdBy.id = :instructorId)")
     List<Review> findByStatusScoped(@Param("status") String status, @Param("instructorId") String instructorId);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE UPPER(r.status) = UPPER(:status) AND (:instructorId IS NULL OR r.submission.assignment.createdBy.id = :instructorId)")
+    long countByStatusScoped(@Param("status") String status, @Param("instructorId") String instructorId);
+
+    @Query("SELECT r.scores FROM Review r WHERE UPPER(r.status) = 'COMPLETED' AND r.scores IS NOT NULL AND (:instructorId IS NULL OR r.submission.assignment.createdBy.id = :instructorId)")
+    List<String> findCompletedScoresScoped(@Param("instructorId") String instructorId);
+
+    @Query("SELECT r FROM Review r WHERE r.reviewer = :reviewer AND (r.submission.courseRoom = :courseRoom OR r.submission.assignment.courseRoom = :courseRoom) ORDER BY r.createdAt DESC")
+    List<Review> findByReviewerAndCourseRoom(@Param("reviewer") User reviewer, @Param("courseRoom") CourseRoom courseRoom);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.submission.courseRoom = :courseRoom OR r.submission.assignment.courseRoom = :courseRoom")
+    long countByCourseRoom(@Param("courseRoom") CourseRoom courseRoom);
 }

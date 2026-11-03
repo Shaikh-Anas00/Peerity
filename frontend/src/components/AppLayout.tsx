@@ -153,7 +153,7 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
       {/* Touch Backdrop when expanded on tablet/touch viewport */}
       {isTouch && isTouchExpanded && !isPinned && (
         <div
-          className="hidden md:block fixed inset-0 bg-slate-900/20 z-30 transition-opacity"
+          className="hidden md:block fixed inset-0 bg-slate-900/20 dark:bg-black/40 z-30 transition-opacity"
           onClick={() => setIsTouchExpanded(false)}
           aria-hidden="true"
         />
@@ -171,7 +171,7 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
         </div>
         <button
           onClick={() => setDrawerOpen(true)}
-          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
@@ -181,11 +181,11 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
       {drawerOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div
-            className="absolute inset-0 bg-slate-900/40"
+            className="absolute inset-0 bg-slate-900/40 dark:bg-black/60"
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
-          <aside className="relative w-64 max-w-[80vw] h-full shadow-xl">
+          <aside className="relative w-64 max-w-[80vw] h-full shadow-xl bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
             <Sidebar
               isMobileDrawer={true}
               isExpanded={true}
@@ -193,7 +193,7 @@ export const AppLayout: React.FC<{ requiredRoles?: Role[] }> = ({ requiredRoles 
             />
             <button
               onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-3 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              className="absolute top-4 right-3 p-1.5 rounded-lg text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-200"
               aria-label="Close menu"
             >
               <X className="w-4 h-4" />

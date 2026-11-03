@@ -25,6 +25,11 @@ public class Submission {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_room_id", nullable = true)
+    private CourseRoom courseRoom;
+
     @Column(name = "original_file_name", nullable = false, length = 255)
     private String originalFileName;
 
@@ -72,6 +77,8 @@ public class Submission {
     public void setAssignment(Assignment assignment) { this.assignment = assignment; }
     public User getAuthor() { return author; }
     public void setAuthor(User author) { this.author = author; }
+    public CourseRoom getCourseRoom() { return courseRoom; }
+    public void setCourseRoom(CourseRoom courseRoom) { this.courseRoom = courseRoom; }
     public String getOriginalFileName() { return originalFileName; }
     public void setOriginalFileName(String originalFileName) { this.originalFileName = originalFileName; }
     public String getFileSize() { return fileSize; }

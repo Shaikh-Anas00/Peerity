@@ -205,7 +205,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
   const [pdfDoc, setPdfDoc] = useState<Awaited<ReturnType<typeof pdfjs.getDocument>["promise"]> | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [scale, setScale] = useState<number>(1.15);
+  const [scale, setScale] = useState<number>(1.40);
   const [rotation, setRotation] = useState<number>(0);
   const [viewMode, setViewMode] = useState<ViewMode>("continuous");
   const [jumpPageInput, setJumpPageInput] = useState<string>("1");
@@ -291,6 +291,22 @@ export const DocViewer: React.FC<DocViewerProps> = ({
         setTotalPages(doc.numPages);
         setCurrentPage(1);
         setJumpPageInput("1");
+
+        // Automatically auto-fit wider to the viewer pane on initial document load
+        setTimeout(() => {
+          if (cancelled || !containerRef.current) return;
+          doc.getPage(1).then((p) => {
+            if (cancelled || !containerRef.current) return;
+            const vp = p.getViewport({ scale: 1, rotation: 0 });
+            const availableWidth = containerRef.current.clientWidth - 40;
+            if (availableWidth > 0 && vp.width > 0) {
+              const fitScale = Math.max(1.15, Math.min(2.2, (availableWidth * 0.95) / vp.width));
+              setScale(Math.round(fitScale * 100) / 100);
+            } else {
+              setScale(1.40);
+            }
+          }).catch(() => setScale(1.40));
+        }, 80);
       } catch (e) {
         console.error("PDF load error:", e);
       }
@@ -357,22 +373,32 @@ export const DocViewer: React.FC<DocViewerProps> = ({
     });
   };
 
-  const handleFitWidth = async () => {
+  const handleFitWidth = useCallback(async () => {
     if (!containerRef.current || !pdfDoc) return;
     try {
-      const page = await pdfDoc.getPage(currentPage);
+      const page = await pdfDoc.getPage(currentPage || 1);
       const vp = page.getViewport({ scale: 1, rotation });
-      const availableWidth = containerRef.current.clientWidth - 48; // padding
+      const availableWidth = containerRef.current.clientWidth - 40; // padding
       if (availableWidth > 0 && vp.width > 0) {
-        const newScale = Math.max(0.4, Math.min(2.5, availableWidth / vp.width));
+        const newScale = Math.max(0.6, Math.min(2.5, (availableWidth * 0.95) / vp.width));
         setScale(Math.round(newScale * 100) / 100);
       }
     } catch {}
-  };
+  }, [pdfDoc, currentPage, rotation]);
 
   const handleResetZoom = () => {
-    setScale(1.15);
+    handleFitWidth();
   };
+
+  // Re-fit width when theater/maximize mode is toggled
+  useEffect(() => {
+    if (pdfDoc && containerRef.current) {
+      const timer = setTimeout(() => {
+        handleFitWidth();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isMaximized, handleFitWidth, pdfDoc]);
 
   const handleRotate = () => {
     setRotation((r) => (r + 90) % 360);
@@ -543,7 +569,7 @@ export const DocViewer: React.FC<DocViewerProps> = ({
                 type="button"
                 onClick={handleResetZoom}
                 className="px-1.5 text-xs font-mono text-slate-700 dark:text-slate-300 hover:text-peerity-800 dark:hover:text-teal-400 transition font-medium select-none"
-                title="Reset to 100%"
+                title="Fit to Width"
               >
                 {Math.round(scale * 100)}%
               </button>

@@ -49,28 +49,63 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         logger.info("Verifying Peerity seed accounts (Admin, Committee, Instructors, Students)...");
 
-        // Seed primary Peerity accounts
-        seedUserIfAbsent("admin@peerity.edu", "Admin@12345", "Dr. Alistair Vance", Role.ADMIN, "Apex Institute of Technology", "Administration & Governance");
-        seedUserIfAbsent("committee1@peerity.edu", "Committee@12345", "Prof. Elena Rostova", Role.COMMITTEE, "Apex Institute of Technology", "Academic Integrity Committee");
-        seedUserIfAbsent("committee2@peerity.edu", "Committee@12345", "Dr. Marcus Sterling", Role.COMMITTEE, "Apex Institute of Technology", "Ethics & Adjudication Panel");
-        seedUserIfAbsent("committee3@peerity.edu", "Committee@12345", "Dr. Priya Sundaram", Role.COMMITTEE, "Apex Institute of Technology", "Appeals Board");
-        seedUserIfAbsent("instructor1@peerity.edu", "Instructor@12345", "Prof. Jonathan Hayes", Role.INSTRUCTOR, "Apex Institute of Technology", "Computer Science");
-        seedUserIfAbsent("instructor2@peerity.edu", "Instructor@12345", "Dr. Sarah Jenkins", Role.INSTRUCTOR, "Apex Institute of Technology", "Software Engineering");
-        seedUserIfAbsent("student1@peerity.edu", "Student@12345", "Alice Chen", Role.STUDENT, "Apex Institute of Technology", "Computer Science");
-        seedUserIfAbsent("student2@peerity.edu", "Student@12345", "Bob Martinez", Role.STUDENT, "Apex Institute of Technology", "Information Systems");
-        seedUserIfAbsent("student3@peerity.edu", "Student@12345", "Chloe Dupont", Role.STUDENT, "Apex Institute of Technology", "Cybersecurity");
-        seedUserIfAbsent("student4@peerity.edu", "Student@12345", "David Kim", Role.STUDENT, "Apex Institute of Technology", "Data Science");
+        // ── Seed / re-encode seed accounts ────────────────────────────────────
+        // seedUserIfAbsent creates the account if missing; reHashIfNeeded updates
+        // the stored password hash when it was encoded with different Argon2 params
+        // (e.g. switching from 256 MB prod params to 8 MB dev params on startup).
+        seedUserIfAbsent("admin@peerity.edu",        "Admin@12345",      "Dr. Alistair Vance",    Role.ADMIN,       "Apex Institute of Technology", "Administration & Governance");
+        seedUserIfAbsent("committee1@peerity.edu",   "Committee@12345",  "Prof. Elena Rostova",   Role.COMMITTEE,   "Apex Institute of Technology", "Academic Integrity Committee");
+        seedUserIfAbsent("committee2@peerity.edu",   "Committee@12345",  "Dr. Marcus Sterling",   Role.COMMITTEE,   "Apex Institute of Technology", "Ethics & Adjudication Panel");
+        seedUserIfAbsent("committee3@peerity.edu",   "Committee@12345",  "Dr. Priya Sundaram",    Role.COMMITTEE,   "Apex Institute of Technology", "Appeals Board");
+        seedUserIfAbsent("instructor1@peerity.edu",  "Instructor@12345", "Prof. Jonathan Hayes",  Role.INSTRUCTOR,  "Apex Institute of Technology", "Computer Science");
+        seedUserIfAbsent("instructor2@peerity.edu",  "Instructor@12345", "Dr. Sarah Jenkins",     Role.INSTRUCTOR,  "Apex Institute of Technology", "Software Engineering");
+        seedUserIfAbsent("student1@peerity.edu",     "Student@12345",    "Alice Chen",            Role.STUDENT,     "Apex Institute of Technology", "Computer Science");
+        seedUserIfAbsent("student2@peerity.edu",     "Student@12345",    "Bob Martinez",          Role.STUDENT,     "Apex Institute of Technology", "Information Systems");
+        seedUserIfAbsent("student3@peerity.edu",     "Student@12345",    "Chloe Dupont",          Role.STUDENT,     "Apex Institute of Technology", "Cybersecurity");
+        seedUserIfAbsent("student4@peerity.edu",     "Student@12345",    "David Kim",             Role.STUDENT,     "Apex Institute of Technology", "Data Science");
+
+        // Re-hash any seed user whose stored hash uses legacy slow parameters ($2a$12$ or heavy prod Argon2).
+        // Uses fast string prefix checks; runs once and does zero hashing on subsequent boots.
+        upgradeSeedHashIfLegacy("admin@peerity.edu",        "Admin@12345");
+        upgradeSeedHashIfLegacy("committee1@peerity.edu",   "Committee@12345");
+        upgradeSeedHashIfLegacy("committee2@peerity.edu",   "Committee@12345");
+        upgradeSeedHashIfLegacy("committee3@peerity.edu",   "Committee@12345");
+        upgradeSeedHashIfLegacy("instructor1@peerity.edu",  "Instructor@12345");
+        upgradeSeedHashIfLegacy("instructor2@peerity.edu",  "Instructor@12345");
+        upgradeSeedHashIfLegacy("student1@peerity.edu",     "Student@12345");
+        upgradeSeedHashIfLegacy("student2@peerity.edu",     "Student@12345");
+        upgradeSeedHashIfLegacy("student3@peerity.edu",     "Student@12345");
+        upgradeSeedHashIfLegacy("student4@peerity.edu",     "Student@12345");
 
         // Backward compatibility for legacy tests/profiles
-        seedUserIfAbsent("admin@trustreview.edu", "Admin@12345", "Dr. Alistair Vance", Role.ADMIN, "Apex Institute of Technology", "Administration & Governance");
-        seedUserIfAbsent("committee1@trustreview.edu", "Committee@12345", "Prof. Elena Rostova", Role.COMMITTEE, "Apex Institute of Technology", "Academic Integrity Committee");
+        seedUserIfAbsent("admin@trustreview.edu",       "Admin@12345",      "Dr. Alistair Vance",   Role.ADMIN,      "Apex Institute of Technology", "Administration & Governance");
+        seedUserIfAbsent("committee1@trustreview.edu",  "Committee@12345",  "Prof. Elena Rostova",  Role.COMMITTEE,  "Apex Institute of Technology", "Academic Integrity Committee");
         seedUserIfAbsent("instructor1@trustreview.edu", "Instructor@12345", "Prof. Jonathan Hayes", Role.INSTRUCTOR, "Apex Institute of Technology", "Computer Science");
-        seedUserIfAbsent("student1@trustreview.edu", "Student@12345", "Alice Chen", Role.STUDENT, "Apex Institute of Technology", "Computer Science");
+        seedUserIfAbsent("student1@trustreview.edu",    "Student@12345",    "Alice Chen",           Role.STUDENT,    "Apex Institute of Technology", "Computer Science");
+        upgradeSeedHashIfLegacy("admin@trustreview.edu",       "Admin@12345");
+        upgradeSeedHashIfLegacy("instructor1@trustreview.edu", "Instructor@12345");
+        upgradeSeedHashIfLegacy("student1@trustreview.edu",    "Student@12345");
 
         seedAssignmentsIfAbsent();
         seedGroupsIfAbsent();
 
         logger.info("Peerity seed initialization complete.");
+    }
+
+    /**
+     * Upgrades the stored password hash for a seed user if it was encoded with a legacy
+     * slow algorithm ($2a$12$ BCrypt or heavy prod Argon2 with 256MB memory).
+     * Uses fast string inspection without running slow hashing operations on startup.
+     */
+    private void upgradeSeedHashIfLegacy(String email, String rawPassword) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String hash = user.getPasswordHash();
+            if (hash != null && (hash.startsWith("$2a$") || hash.contains("m=262144"))) {
+                logger.info("Upgrading legacy slow password hash for seed account: {}", email);
+                user.setPasswordHash(passwordEncoder.encode(rawPassword));
+                userRepository.save(user);
+            }
+        });
     }
 
     private void seedAssignmentsIfAbsent() {

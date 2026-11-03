@@ -38,14 +38,36 @@ public class SecurityConfig {
     @Value("${trustreview.client.url:http://localhost:5173}")
     private String clientUrl;
 
+    // ── Argon2 parameters — light in dev, strong in prod ─────────────────────
+    @Value("${peerity.argon2.salt-length:16}")
+    private int argon2SaltLength;
+
+    @Value("${peerity.argon2.hash-length:32}")
+    private int argon2HashLength;
+
+    @Value("${peerity.argon2.parallelism:1}")
+    private int argon2Parallelism;
+
+    /** Memory in KB. Dev default 8 MB; prod default 256 MB. */
+    @Value("${peerity.argon2.memory:8192}")
+    private int argon2Memory;
+
+    @Value("${peerity.argon2.iterations:1}")
+    private int argon2Iterations;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new PasswordEncoder() {
-            private final Argon2PasswordEncoder argon2 = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-            private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
+        // Build Argon2PasswordEncoder with profile-appropriate cost parameters.
+        // Backward-compat: if the stored hash starts with a BCrypt prefix ($2a/$2b/$2y),
+        // fall through to BCrypt matching so existing BCrypt-hashed accounts still work.
+        final Argon2PasswordEncoder argon2 = new Argon2PasswordEncoder(
+                argon2SaltLength, argon2HashLength,
+                argon2Parallelism, argon2Memory, argon2Iterations);
+        final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(10);
 
+        return new PasswordEncoder() {
             @Override
             public String encode(CharSequence rawPassword) {
                 return argon2.encode(rawPassword);
@@ -53,7 +75,10 @@ public class SecurityConfig {
 
             @Override
             public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                if (encodedPassword != null && (encodedPassword.startsWith("$2a$") || encodedPassword.startsWith("$2b$") || encodedPassword.startsWith("$2y$"))) {
+                if (encodedPassword != null
+                        && (encodedPassword.startsWith("$2a$")
+                            || encodedPassword.startsWith("$2b$")
+                            || encodedPassword.startsWith("$2y$"))) {
                     return bcrypt.matches(rawPassword, encodedPassword);
                 }
                 return argon2.matches(rawPassword, encodedPassword);

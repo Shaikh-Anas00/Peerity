@@ -34,6 +34,14 @@ public class Assignment {
     @JoinColumn(name = "created_by_id", nullable = false)
     private User createdBy;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_room_id", nullable = true)
+    private CourseRoom courseRoom;
+
+    @Column(name = "is_group_assignment", nullable = false)
+    private boolean isGroupAssignment = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -66,6 +74,10 @@ public class Assignment {
     public void setReviewDeadline(LocalDateTime reviewDeadline) { this.reviewDeadline = reviewDeadline; }
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+    public CourseRoom getCourseRoom() { return courseRoom; }
+    public void setCourseRoom(CourseRoom courseRoom) { this.courseRoom = courseRoom; }
+    public boolean isGroupAssignment() { return isGroupAssignment; }
+    public void setGroupAssignment(boolean isGroupAssignment) { this.isGroupAssignment = isGroupAssignment; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

@@ -27,6 +27,10 @@ public class Group {
     @JoinColumn(name = "assignment_id")
     private Assignment assignment;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_room_id", nullable = true)
+    private CourseRoom courseRoom;
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroupMembership> memberships;
 
@@ -64,6 +68,8 @@ public class Group {
     public void setStatus(GroupStatus status) { this.status = status; }
     public Assignment getAssignment() { return assignment; }
     public void setAssignment(Assignment assignment) { this.assignment = assignment; }
+    public CourseRoom getCourseRoom() { return courseRoom; }
+    public void setCourseRoom(CourseRoom courseRoom) { this.courseRoom = courseRoom; }
     public List<GroupMembership> getMemberships() { return memberships; }
     public void setMemberships(List<GroupMembership> memberships) { this.memberships = memberships; }
     public LocalDateTime getCreatedAt() { return createdAt; }

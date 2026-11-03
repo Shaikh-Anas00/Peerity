@@ -34,4 +34,7 @@ public interface AppealRepository extends JpaRepository<Appeal, String> {
 
     @Query("SELECT a.status, COUNT(a) FROM Appeal a WHERE (:instructorId IS NULL OR a.review.submission.assignment.createdBy.id = :instructorId) GROUP BY a.status")
     List<Object[]> countGroupedByStatusScoped(@Param("instructorId") String instructorId);
+
+    @Query("SELECT COUNT(a) > 0 FROM Appeal a WHERE (a.review.submission.courseRoom.id = :roomId OR a.review.submission.assignment.courseRoom.id = :roomId) AND a.status IN ('SUBMITTED', 'UNDER_INVESTIGATION')")
+    boolean existsActiveAppealInCourseRoom(@Param("roomId") String roomId);
 }

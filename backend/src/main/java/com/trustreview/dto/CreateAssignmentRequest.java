@@ -25,6 +25,15 @@ public class CreateAssignmentRequest {
     @Future(message = "Review deadline must be in the future")
     private LocalDateTime reviewDeadline;
 
+    private String courseRoomId;
+    private Boolean isGroupAssignment;
+
+    public Boolean getIsGroupAssignment() { return isGroupAssignment; }
+    public void setIsGroupAssignment(Boolean isGroupAssignment) { this.isGroupAssignment = isGroupAssignment; }
+
+    public String getCourseRoomId() { return courseRoomId; }
+    public void setCourseRoomId(String courseRoomId) { this.courseRoomId = courseRoomId; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }

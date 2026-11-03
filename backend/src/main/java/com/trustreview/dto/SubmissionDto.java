@@ -22,6 +22,11 @@ public class SubmissionDto {
     private LocalDateTime submittedAt;
     private LocalDateTime createdAt;
 
+    // Course room fields
+    private String courseRoomId;
+    private String courseRoomName;
+    private String courseCode;
+
     // Privacy fields
     private String authorPseudonym;
     private boolean isAnonymousView;
@@ -47,6 +52,11 @@ public class SubmissionDto {
         dto.createdAt = s.getCreatedAt();
         dto.isAnonymousView = true;
         dto.authorPseudonym = pseudonym != null ? pseudonym : "Anonymous Author";
+        if (s.getCourseRoom() != null) {
+            dto.courseRoomId = s.getCourseRoom().getId();
+            dto.courseRoomName = s.getCourseRoom().getName();
+            dto.courseCode = s.getCourseRoom().getCourseCode();
+        }
         return dto;
     }
 
@@ -70,6 +80,11 @@ public class SubmissionDto {
             dto.authorName = s.getAuthor().getFullName();
             dto.authorEmail = s.getAuthor().getEmail();
             dto.authorDepartment = s.getAuthor().getDepartment();
+        }
+        if (s.getCourseRoom() != null) {
+            dto.courseRoomId = s.getCourseRoom().getId();
+            dto.courseRoomName = s.getCourseRoom().getName();
+            dto.courseCode = s.getCourseRoom().getCourseCode();
         }
         return dto;
     }
@@ -111,4 +126,10 @@ public class SubmissionDto {
     public void setAuthorEmail(String authorEmail) { this.authorEmail = authorEmail; }
     public String getAuthorDepartment() { return authorDepartment; }
     public void setAuthorDepartment(String authorDepartment) { this.authorDepartment = authorDepartment; }
+    public String getCourseRoomId() { return courseRoomId; }
+    public void setCourseRoomId(String courseRoomId) { this.courseRoomId = courseRoomId; }
+    public String getCourseRoomName() { return courseRoomName; }
+    public void setCourseRoomName(String courseRoomName) { this.courseRoomName = courseRoomName; }
+    public String getCourseCode() { return courseCode; }
+    public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
 }

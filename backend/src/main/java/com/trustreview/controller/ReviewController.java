@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,5 +101,28 @@ public class ReviewController {
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ApiResponse(false, "No rating found for review: " + id)));
+    }
+
+    /**
+     * POST /api/reviews/distribute — INSTRUCTOR/ADMIN
+     * Distributes reviews across submissions in a classroom.
+     */
+    @PostMapping("/distribute")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
+    public ResponseEntity<java.util.Map<String, Object>> distributeReviews(
+            @RequestParam("courseRoomId") String courseRoomId,
+            @RequestParam(value = "assignmentId", required = false) String assignmentId,
+            @RequestBody(required = false) java.util.Map<String, Integer> body,
+            Authentication auth) {
+        int count = (body != null && body.containsKey("reviewerCount"))
+                ? body.get("reviewerCount") : 2;
+        User requestor = PeerityUserDetails.requireUser(auth);
+        java.util.Map<String, Object> result;
+        if (assignmentId != null && !assignmentId.isBlank()) {
+            result = reviewService.distribute(assignmentId, count, requestor, courseRoomId);
+        } else {
+            result = reviewService.distributeForClassroom(courseRoomId, count, requestor);
+        }
+        return ResponseEntity.ok(result);
     }
 }

@@ -3,10 +3,12 @@ package com.trustreview.service;
 import com.trustreview.dto.CryptoEncryptResponse;
 import com.trustreview.dto.SubmissionDto;
 import com.trustreview.model.Assignment;
+import com.trustreview.model.CourseRoom;
 import com.trustreview.model.Role;
 import com.trustreview.model.Submission;
 import com.trustreview.model.User;
 import com.trustreview.repository.AssignmentRepository;
+import com.trustreview.repository.CourseRoomRepository;
 import com.trustreview.repository.ReviewRepository;
 import com.trustreview.repository.SubmissionRepository;
 import org.slf4j.Logger;
@@ -30,19 +32,34 @@ public class SubmissionService {
     private final ReviewRepository reviewRepository;
     private final FileCryptoService fileCryptoService;
     private final AuditLedgerService auditLedgerService;
+    private final CourseRoomRepository courseRoomRepository;
+    private final CourseRoomService courseRoomService;
 
     public record DecryptedFilePayload(byte[] data, String originalFileName, String fileType) {}
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public SubmissionService(SubmissionRepository submissionRepository,
+                             AssignmentRepository assignmentRepository,
+                             ReviewRepository reviewRepository,
+                             FileCryptoService fileCryptoService,
+                             AuditLedgerService auditLedgerService,
+                             CourseRoomRepository courseRoomRepository,
+                             CourseRoomService courseRoomService) {
+        this.submissionRepository = submissionRepository;
+        this.assignmentRepository = assignmentRepository;
+        this.reviewRepository = reviewRepository;
+        this.fileCryptoService = fileCryptoService;
+        this.auditLedgerService = auditLedgerService;
+        this.courseRoomRepository = courseRoomRepository;
+        this.courseRoomService = courseRoomService;
+    }
 
     public SubmissionService(SubmissionRepository submissionRepository,
                              AssignmentRepository assignmentRepository,
                              ReviewRepository reviewRepository,
                              FileCryptoService fileCryptoService,
                              AuditLedgerService auditLedgerService) {
-        this.submissionRepository = submissionRepository;
-        this.assignmentRepository = assignmentRepository;
-        this.reviewRepository = reviewRepository;
-        this.fileCryptoService = fileCryptoService;
-        this.auditLedgerService = auditLedgerService;
+        this(submissionRepository, assignmentRepository, reviewRepository, fileCryptoService, auditLedgerService, null, null);
     }
 
     /**
@@ -51,6 +68,11 @@ public class SubmissionService {
      */
     @Transactional
     public SubmissionDto createWithFile(String assignmentId, MultipartFile file, User author) throws IOException {
+        return createWithFile(assignmentId, file, author, null);
+    }
+
+    @Transactional
+    public SubmissionDto createWithFile(String assignmentId, MultipartFile file, User author, String courseRoomId) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Submission file cannot be empty.");
         }
@@ -67,13 +89,34 @@ public class SubmissionService {
             throw new IllegalArgumentException("You have already submitted work for this assignment.");
         }
 
-        // 1. Encrypt the file in-process with AES-256-GCM
+        CourseRoom courseRoom = null;
+        if (courseRoomId != null && !courseRoomId.isBlank() && courseRoomRepository != null) {
+            courseRoom = courseRoomRepository.findById(courseRoomId)
+                    .orElseThrow(() -> new IllegalArgumentException("Course room not found: " + courseRoomId));
+        } else if (assignment.getCourseRoom() != null) {
+            courseRoom = assignment.getCourseRoom();
+        }
+
+        if (courseRoom != null) {
+            if (assignment.getCourseRoom() != null && !courseRoom.getId().equals(assignment.getCourseRoom().getId())) {
+                throw new IllegalArgumentException("Assignment does not belong to the specified course room.");
+            }
+            if (!courseRoom.isActive()) {
+                throw new IllegalStateException("This course room is no longer active.");
+            }
+            if (courseRoomService != null) {
+                courseRoomService.validateStudentEnrollment(courseRoom, author);
+            }
+        }
+
+        // 1. Encrypt multipart file in-process using AES-256-GCM
         CryptoEncryptResponse cryptoResp = fileCryptoService.encryptFile(file);
 
         // 2. Persist submission record
         Submission s = new Submission();
         s.setAssignment(assignment);
         s.setAuthor(author);
+        s.setCourseRoom(courseRoom);
         s.setOriginalFileName(file.getOriginalFilename() != null ? file.getOriginalFilename() : "submission.pdf");
         s.setFileSize(formatFileSize(file.getSize()));
         s.setFileType(file.getContentType() != null ? file.getContentType() : "application/octet-stream");
@@ -83,8 +126,8 @@ public class SubmissionService {
         s.setSubmittedAt(LocalDateTime.now());
 
         Submission saved = submissionRepository.save(s);
-        logger.info("Saved submission id={} with encryptedPath={}, sha256={}",
-                saved.getId(), saved.getFilePath(), saved.getFileHash());
+        logger.info("Saved submission id={} with encryptedPath={}, sha256={}, courseRoom={}",
+                saved.getId(), saved.getFilePath(), saved.getFileHash(), courseRoom != null ? courseRoom.getId() : "none");
 
         // Phase 6: Log cryptographically chained audit event
         auditLedgerService.logEvent(
@@ -93,6 +136,7 @@ public class SubmissionService {
                 "Submission",
                 saved.getId(),
                 "Encrypted file: " + saved.getOriginalFileName() + " | SHA-256: " + saved.getFileHash() + " | Size: " + saved.getFileSize()
+                + (courseRoom != null ? " | Room: " + courseRoom.getName() : "")
         );
 
         return SubmissionDto.forAuthor(saved);
@@ -114,6 +158,16 @@ public class SubmissionService {
         if (!isAuthor && !isReviewer && !isStaff) {
             logger.warn("Unauthorized file access attempt: user={}, submission={}", requester.getId(), submissionId);
             throw new SecurityException("You are not authorized to download this submission file.");
+        }
+
+        // If submission belongs to a CourseRoom, verify instructor ownership if requester is an instructor
+        if (submission.getCourseRoom() != null && requester.getRole() == Role.INSTRUCTOR) {
+            boolean ownsRoom = submission.getCourseRoom().getInstructor() != null
+                    && submission.getCourseRoom().getInstructor().getId().equals(requester.getId());
+            if (!ownsRoom) {
+                logger.warn("Instructor {} does not own course room {} for submission {}", requester.getId(), submission.getCourseRoom().getId(), submissionId);
+                throw new SecurityException("You are not the instructor for this submission's course room.");
+            }
         }
 
         logger.info("User {} authorized to download submission {}. Decrypting in-process...",
@@ -145,6 +199,18 @@ public class SubmissionService {
 
     @Transactional(readOnly = true)
     public List<SubmissionDto> findMySubmissions(User author) {
+        return findMySubmissions(author, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubmissionDto> findMySubmissions(User author, String courseRoomId) {
+        if (courseRoomId != null && !courseRoomId.isBlank() && courseRoomRepository != null) {
+            CourseRoom room = courseRoomRepository.findById(courseRoomId).orElse(null);
+            if (room != null) {
+                return submissionRepository.findByAuthorAndCourseRoomOrderBySubmittedAtDesc(author, room)
+                        .stream().map(SubmissionDto::forAuthor).collect(Collectors.toList());
+            }
+        }
         return submissionRepository.findByAuthorOrderBySubmittedAtDesc(author)
                 .stream().map(SubmissionDto::forAuthor).collect(Collectors.toList());
     }

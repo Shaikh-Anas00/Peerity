@@ -1,0 +1,8 @@
+Project Title: K_3_Peerity A Privacy-Preserving Peer Evaluation Platform with Quorum-Governed Identity Disclosure
+
+Branch Div:-CS-K	  GROUP No:- 04
+
+Sr.	Roll No.	Name	            Div	   Batch	PRN
+1	4	        Anas Shaikh	        CS-K	K1	12412236
+2	18	        Rajwardhan Shinde	CS-K	K1	12414561
+3	19	        Roshan Shinde	    CS-K	K1	12411129

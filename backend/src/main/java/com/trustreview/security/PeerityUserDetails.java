@@ -1,6 +1,8 @@
 package com.trustreview.security;
 
 import com.trustreview.model.User;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -66,5 +68,26 @@ public class PeerityUserDetails implements UserDetails, Serializable {
     @Override
     public boolean isEnabled() {
         return user.isActive();
+    }
+
+    public static User requireUser(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AccessDeniedException("User is not authenticated");
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof PeerityUserDetails pud) {
+            return pud.getUser();
+        }
+        if (principal instanceof User u) {
+            return u;
+        }
+        throw new AccessDeniedException("Unable to resolve authenticated user");
+    }
+
+    public static User requireUser(PeerityUserDetails principal) {
+        if (principal == null || principal.getUser() == null) {
+            throw new AccessDeniedException("User is not authenticated");
+        }
+        return principal.getUser();
     }
 }

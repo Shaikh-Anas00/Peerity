@@ -1,66 +1,77 @@
 import React from "react";
-import clsx from "clsx";
-import { Loader2 } from "lucide-react";
 
-export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
-export type ButtonSize = "sm" | "md";
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** Shows a spinner in place of leftIcon and disables the button. */
   loading?: boolean;
   leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "bg-peerity-800 hover:bg-peerity-600 text-white shadow-sm dark:bg-teal-600 dark:hover:bg-teal-500",
+    "bg-peerity-800 hover:bg-peerity-700 text-white dark:bg-teal-600 dark:hover:bg-teal-500 shadow-2xs",
   secondary:
-    "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700",
-  danger:
-    "bg-red-600 hover:bg-red-700 text-white shadow-sm dark:bg-red-600 dark:hover:bg-red-500",
+    "bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 border border-transparent dark:border-slate-700",
+  outline:
+    "bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
   ghost:
-    "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+    "bg-transparent hover:bg-slate-100 text-slate-700 dark:text-slate-300 dark:hover:bg-slate-800",
+  danger:
+    "bg-rose-600 hover:bg-rose-700 text-white dark:bg-rose-600 dark:hover:bg-rose-500 shadow-2xs",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: "px-3 py-1.5 text-xs gap-1.5",
-  md: "px-4 py-2 text-sm gap-2",
+  sm: "px-3 py-1.5 text-xs rounded-lg gap-1.5",
+  md: "px-4 py-2 text-sm rounded-xl gap-2",
+  lg: "px-5 py-2.5 text-base rounded-xl gap-2.5",
 };
 
-/**
- * Single source of truth for button styling. Every page previously hand-wrote its own
- * Tailwind button classes, which had already drifted (rounded-lg vs rounded-xl, shadow-sm vs
- * shadow-2xs vs none, inconsistent dark: coverage) — see P1.6/P1.8 in the remediation plan.
- */
-export const Button: React.FC<ButtonProps> = ({
-  variant = "primary",
-  size = "md",
-  loading = false,
-  leftIcon,
-  disabled,
-  className,
-  children,
-  ...rest
-}) => {
-  return (
-    <button
-      disabled={disabled || loading}
-      className={clsx(
-        "inline-flex items-center justify-center rounded-lg font-semibold font-display transition disabled:opacity-50 disabled:cursor-not-allowed",
-        VARIANT_CLASSES[variant],
-        SIZE_CLASSES[size],
-        className
-      )}
-      {...rest}
-    >
-      {loading ? (
-        <Loader2 className={clsx("animate-spin", size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4")} />
-      ) : (
-        leftIcon
-      )}
-      {children}
-    </button>
-  );
-};
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      variant = "primary",
+      size = "md",
+      loading = false,
+      leftIcon,
+      rightIcon,
+      disabled,
+      className = "",
+      children,
+      type = "button",
+      ...props
+    },
+    ref
+  ) => {
+    const isDisabled = disabled || loading;
+
+    return (
+      <button
+        ref={ref}
+        type={type}
+        disabled={isDisabled}
+        aria-busy={loading || undefined}
+        className={`inline-flex items-center justify-center font-semibold font-display transition-all duration-150 active:scale-[0.98] disabled:active:scale-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40 disabled:opacity-50 disabled:cursor-not-allowed ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`}
+        {...props}
+      >
+        {loading ? (
+          <span
+            role="status"
+            aria-label="Loading"
+            className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+          />
+        ) : (
+          leftIcon
+        )}
+        {children}
+        {!loading && rightIcon}
+      </button>
+    );
+  }
+);
+
+Button.displayName = "Button";
+export default Button;

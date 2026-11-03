@@ -17,6 +17,8 @@ import { DiagnosticsPage } from "./pages/DiagnosticsPage";
 import LandingPage from "./pages/LandingPage";
 import { GroupsPage } from "./pages/GroupsPage";
 import { GroupsManagePage } from "./pages/GroupsManagePage";
+import { ClassroomsPage } from "./pages/ClassroomsPage";
+import { ClassroomWorkspacePage } from "./pages/ClassroomWorkspacePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ChangePasswordPage } from "./pages/ChangePasswordPage";
@@ -40,6 +42,8 @@ export const App: React.FC = () => (
     <Route element={<AppLayout />}>
       <Route path="/dashboard"   element={<Dashboard />} />
       <Route path="/assignments" element={<AssignmentsPage />} />
+      <Route path="/classrooms"  element={<ClassroomsPage />} />
+      <Route path="/classrooms/:id" element={<ClassroomWorkspacePage />} />
       <Route path="/appeals"     element={<AppealsPage />} />
       <Route path="/groups"      element={<GroupsPage />} />
       <Route path="/profile"                  element={<ProfilePage />} />

@@ -15,6 +15,11 @@ public class AssignmentDto {
     private String createdById;
     private LocalDateTime createdAt;
     private boolean hasSubmitted;
+    private String courseRoomId;
+    private String courseRoomName;
+    private String courseCode;
+    private Long submissionCount;
+    private boolean isGroupAssignment;
 
     public AssignmentDto() {}
 
@@ -35,9 +40,15 @@ public class AssignmentDto {
                 : (a.getDeadline() != null ? a.getDeadline().plusDays(7) : null);
         dto.createdAt = a.getCreatedAt();
         dto.hasSubmitted = hasSubmitted;
+        dto.isGroupAssignment = a.isGroupAssignment();
         if (a.getCreatedBy() != null) {
             dto.createdByName = a.getCreatedBy().getFullName();
             dto.createdById = a.getCreatedBy().getId();
+        }
+        if (a.getCourseRoom() != null) {
+            dto.courseRoomId = a.getCourseRoom().getId();
+            dto.courseRoomName = a.getCourseRoom().getName();
+            dto.courseCode = a.getCourseRoom().getCourseCode();
         }
         return dto;
     }
@@ -64,4 +75,14 @@ public class AssignmentDto {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public boolean isHasSubmitted() { return hasSubmitted; }
     public void setHasSubmitted(boolean hasSubmitted) { this.hasSubmitted = hasSubmitted; }
+    public String getCourseRoomId() { return courseRoomId; }
+    public void setCourseRoomId(String courseRoomId) { this.courseRoomId = courseRoomId; }
+    public String getCourseRoomName() { return courseRoomName; }
+    public void setCourseRoomName(String courseRoomName) { this.courseRoomName = courseRoomName; }
+    public String getCourseCode() { return courseCode; }
+    public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
+    public Long getSubmissionCount() { return submissionCount; }
+    public void setSubmissionCount(Long submissionCount) { this.submissionCount = submissionCount; }
+    public boolean isGroupAssignment() { return isGroupAssignment; }
+    public void setGroupAssignment(boolean groupAssignment) { isGroupAssignment = groupAssignment; }
 }

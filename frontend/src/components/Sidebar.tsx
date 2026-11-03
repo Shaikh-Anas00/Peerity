@@ -17,6 +17,7 @@ import {
   Pin,
   UserCircle,
   Activity,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/assignments", label: "Assignments", icon: ClipboardList },
+  { to: "/classrooms", label: "Classrooms", icon: GraduationCap, roles: ["STUDENT", "INSTRUCTOR", "ADMIN"] },
   { to: "/reviews", label: "My Reviews", icon: BookOpen, roles: ["STUDENT"] },
   { to: "/feedback", label: "Feedback", icon: MessageSquare, roles: ["STUDENT"] },
   { to: "/appeals", label: "Disputes", icon: Scale, roles: ["STUDENT", "INSTRUCTOR", "ADMIN"] },
@@ -127,11 +129,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 isPinned
                   ? "text-peerity-800 bg-peerity-100 hover:bg-peerity-200 dark:text-teal-400 dark:bg-teal-900/30 dark:hover:bg-teal-900/50"
                   : "text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-slate-800"
+
               }`}
             >
               <Pin
                 className={`w-4 h-4 transition-transform ${
                   isPinned ? "fill-peerity-800 text-peerity-800 dark:fill-teal-400 dark:text-teal-400 -rotate-45" : "text-slate-500 dark:text-slate-400"
+
                 }`}
               />
             </button>
@@ -174,6 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     isActive
                       ? "bg-peerity-100 text-peerity-800 font-semibold shadow-2xs ring-1 ring-peerity-200 dark:bg-teal-900/30 dark:text-teal-400 dark:ring-teal-800"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+
                   }`
                 }
               >
@@ -194,6 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   isActive
                     ? "bg-peerity-100 text-peerity-800 font-semibold dark:bg-teal-900/30 dark:text-teal-400"
                     : "text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+
                 }`
               }
             >
@@ -221,6 +227,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
             ) : (
               <div className="w-9 h-9 rounded-full bg-peerity-100 text-peerity-800 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-sm font-bold font-display flex-shrink-0">
+
                 {user.fullName?.charAt(0).toUpperCase() ?? "?"}
               </div>
             )}
@@ -236,6 +243,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             onClick={handleLogout}
             className="mt-1 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors font-display"
+
           >
             <LogOut className="w-[18px] h-[18px]" strokeWidth={1.9} />
             <span className="whitespace-nowrap">Sign out</span>
@@ -247,6 +255,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             to="/profile"
             onClick={onNavigate}
             className="w-9 h-9 rounded-full bg-peerity-100 text-peerity-800 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-xs font-bold font-display shadow-2xs hover:ring-2 hover:ring-peerity-600 dark:hover:ring-teal-500 transition overflow-hidden"
+
             title={`${user.fullName} (${user.role}) - View Profile`}
           >
             {user.avatarUrl ? (
@@ -264,6 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             title="Sign out"
             aria-label="Sign out"
             className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors"
+
           >
             <LogOut className="w-[18px] h-[18px]" strokeWidth={1.9} />
           </button>
